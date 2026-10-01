@@ -53,7 +53,9 @@ fn main() {
         "playlist-remove" => cmd_playlist_remove(rest),
         "playlist-move" => cmd_playlist_move(rest),
         "playlist-reorder" => cmd_playlist_reorder(rest),
-        other => Err(format!("unknown command: {other}. Try `soundhub-cli help`.")),
+        other => Err(format!(
+            "unknown command: {other}. Try `soundhub-cli help`."
+        )),
     };
 
     if let Err(e) = result {
@@ -133,7 +135,9 @@ fn cmd_init(args: &[String]) -> Result<(), String> {
         let c = lib.open_db().map_err(|e| e.to_string())?;
         (lib, c)
     };
-    let count = Repo::new(&conn).count_ready_assets().map_err(|e| e.to_string())?;
+    let count = Repo::new(&conn)
+        .count_ready_assets()
+        .map_err(|e| e.to_string())?;
     println!(
         "{} library at {} ({} ready assets)",
         if already { "Opened" } else { "Created" },
@@ -151,9 +155,7 @@ fn cmd_import(args: &[String]) -> Result<(), String> {
         rest = &rest[1..];
     }
     if rest.len() < 2 {
-        return Err(
-            "usage: import [--keep-duplicates] <library_dir> <file_or_dir>...".into(),
-        );
+        return Err("usage: import [--keep-duplicates] <library_dir> <file_or_dir>...".into());
     }
     let (library, conn) = open(&rest[0])?;
     let sources: Vec<PathBuf> = rest[1..].iter().map(PathBuf::from).collect();
@@ -178,7 +180,14 @@ fn cmd_import(args: &[String]) -> Result<(), String> {
             ImportOutcome::Failed => "FAIL",
             ImportOutcome::Cancelled => "CANC",
         };
-        println!("  [{mark}] {}{}", f.source_path, f.asset_id.as_deref().map(|s| format!(" → {s}")).unwrap_or_default());
+        println!(
+            "  [{mark}] {}{}",
+            f.source_path,
+            f.asset_id
+                .as_deref()
+                .map(|s| format!(" → {s}"))
+                .unwrap_or_default()
+        );
         if let Some(e) = &f.error {
             println!("         {e}");
         }
@@ -189,7 +198,9 @@ fn cmd_import(args: &[String]) -> Result<(), String> {
 fn cmd_list(args: &[String]) -> Result<(), String> {
     let (library, conn) = open(args.first().ok_or("usage: list <library_dir>")?)?;
     let _ = library;
-    let assets = Repo::new(&conn).list_assets(200, 0).map_err(|e| e.to_string())?;
+    let assets = Repo::new(&conn)
+        .list_assets(200, 0)
+        .map_err(|e| e.to_string())?;
     if assets.is_empty() {
         println!("(no ready assets)");
         return Ok(());
@@ -199,8 +210,12 @@ fn cmd_list(args: &[String]) -> Result<(), String> {
             "{}\t{}\t{} Hz\t{}\t{}",
             a.id,
             a.filename,
-            a.sample_rate.map(|s| s.to_string()).unwrap_or_else(|| "—".into()),
-            a.duration_ms.map(|ms| format!("{:.1}s", ms as f64 / 1000.0)).unwrap_or_else(|| "—".into()),
+            a.sample_rate
+                .map(|s| s.to_string())
+                .unwrap_or_else(|| "—".into()),
+            a.duration_ms
+                .map(|ms| format!("{:.1}s", ms as f64 / 1000.0))
+                .unwrap_or_else(|| "—".into()),
             a.file_size,
         );
     }
@@ -252,11 +267,9 @@ fn cmd_untag(args: &[String]) -> Result<(), String> {
     let id = parse_id(&args[1])?;
     let repo = Repo::new(&conn);
     let tag_id: Option<String> = conn
-        .query_row(
-            "SELECT id FROM tags WHERE name = ?1",
-            [&args[2]],
-            |r| r.get(0),
-        )
+        .query_row("SELECT id FROM tags WHERE name = ?1", [&args[2]], |r| {
+            r.get(0)
+        })
         .ok();
     let Some(tag_id) = tag_id else {
         println!("tag '{}' not found", args[2]);
@@ -328,7 +341,9 @@ fn cmd_smart(args: &[String]) -> Result<(), String> {
     };
     let raw = &args[4];
     let value = match field {
-        SmartField::SampleRate => serde_json::json!(raw.parse::<i64>().map_err(|e| e.to_string())?),
+        SmartField::SampleRate => {
+            serde_json::json!(raw.parse::<i64>().map_err(|e| e.to_string())?)
+        }
         SmartField::HasGps => serde_json::json!(raw != "false"),
         _ => serde_json::json!(raw),
     };
@@ -343,7 +358,12 @@ fn cmd_smart(args: &[String]) -> Result<(), String> {
     let members = repo
         .list_collection_assets(&c.id)
         .map_err(|e| e.to_string())?;
-    println!("created smart collection '{}' ({}) → {} member(s)", c.name, c.id, members.len());
+    println!(
+        "created smart collection '{}' ({}) → {} member(s)",
+        c.name,
+        c.id,
+        members.len()
+    );
     for id in members {
         println!("  {id}");
     }
@@ -403,7 +423,9 @@ fn cmd_info(args: &[String]) -> Result<(), String> {
     println!(
         "Collections: {} ({} smart)",
         cols.len(),
-        cols.iter().filter(|c| c.collection_type == CollectionType::Smart).count()
+        cols.iter()
+            .filter(|c| c.collection_type == CollectionType::Smart)
+            .count()
     );
     println!("GPS     : {}", gps.len());
     Ok(())
@@ -412,7 +434,9 @@ fn cmd_info(args: &[String]) -> Result<(), String> {
 fn cmd_trash(args: &[String]) -> Result<(), String> {
     let (_lib, conn) = open(args.first().ok_or("usage: trash <library_dir>")?)?;
     let repo = Repo::new(&conn);
-    let items = repo.list_deleted_assets(200, 0).map_err(|e| e.to_string())?;
+    let items = repo
+        .list_deleted_assets(200, 0)
+        .map_err(|e| e.to_string())?;
     if items.is_empty() {
         println!("(recycle bin is empty)");
         return Ok(());
@@ -435,7 +459,10 @@ fn cmd_delete(args: &[String]) -> Result<(), String> {
         return Err("usage: delete <library_dir> <asset_id>...".into());
     }
     let (_library, conn) = open(&args[0])?;
-    let ids: Vec<AssetId> = args[1..].iter().map(|s| parse_id(s)).collect::<Result<_, _>>()?;
+    let ids: Vec<AssetId> = args[1..]
+        .iter()
+        .map(|s| parse_id(s))
+        .collect::<Result<_, _>>()?;
     let n = soundhub_core::undo::soft_delete(&conn, &ids).map_err(|e| e.to_string())?;
     println!("moved {n} asset(s) to recycle bin (use `undo` to reverse)");
     Ok(())
@@ -446,7 +473,10 @@ fn cmd_restore(args: &[String]) -> Result<(), String> {
         return Err("usage: restore <library_dir> <asset_id>...".into());
     }
     let (_lib, conn) = open(&args[0])?;
-    let ids: Vec<AssetId> = args[1..].iter().map(|s| parse_id(s)).collect::<Result<_, _>>()?;
+    let ids: Vec<AssetId> = args[1..]
+        .iter()
+        .map(|s| parse_id(s))
+        .collect::<Result<_, _>>()?;
     let n = soundhub_core::undo::restore(&conn, &ids).map_err(|e| e.to_string())?;
     println!("restored {n} asset(s)");
     Ok(())
@@ -457,7 +487,10 @@ fn cmd_purge(args: &[String]) -> Result<(), String> {
         return Err("usage: purge <library_dir> <asset_id>...".into());
     }
     let (library, conn) = open(&args[0])?;
-    let ids: Vec<AssetId> = args[1..].iter().map(|s| parse_id(s)).collect::<Result<_, _>>()?;
+    let ids: Vec<AssetId> = args[1..]
+        .iter()
+        .map(|s| parse_id(s))
+        .collect::<Result<_, _>>()?;
     let repo = Repo::new(&conn);
     let mut n = 0u32;
     for id in &ids {
@@ -478,7 +511,9 @@ fn cmd_purge(args: &[String]) -> Result<(), String> {
 fn cmd_empty_trash(args: &[String]) -> Result<(), String> {
     let (library, conn) = open(args.first().ok_or("usage: empty-trash <library_dir>")?)?;
     let repo = Repo::new(&conn);
-    let deleted = repo.list_deleted_assets(10_000, 0).map_err(|e| e.to_string())?;
+    let deleted = repo
+        .list_deleted_assets(10_000, 0)
+        .map_err(|e| e.to_string())?;
     let mut n = 0u32;
     for a in deleted {
         let abs = library.asset_abspath(&a.library_relpath);
@@ -552,7 +587,9 @@ fn cmd_dedupe(args: &[String]) -> Result<(), String> {
 
 fn cmd_tags(args: &[String]) -> Result<(), String> {
     let (_lib, conn) = open(args.first().ok_or("usage: tags <library_dir>")?)?;
-    let usage = Repo::new(&conn).list_tags_with_usage().map_err(|e| e.to_string())?;
+    let usage = Repo::new(&conn)
+        .list_tags_with_usage()
+        .map_err(|e| e.to_string())?;
     if usage.is_empty() {
         println!("(no tags)");
         return Ok(());
@@ -646,7 +683,8 @@ fn cmd_playlist(args: &[String]) -> Result<(), String> {
             }
         }
         Some("show") => {
-            let id = RowId::parse(args.get(2).ok_or("need playlist_id")?).map_err(|e| e.to_string())?;
+            let id =
+                RowId::parse(args.get(2).ok_or("need playlist_id")?).map_err(|e| e.to_string())?;
             let tracks = repo.list_playlist_tracks(&id).map_err(|e| e.to_string())?;
             println!("{} track(s):", tracks.len());
             for t in tracks {
@@ -654,13 +692,15 @@ fn cmd_playlist(args: &[String]) -> Result<(), String> {
             }
         }
         Some("rename") => {
-            let id = RowId::parse(args.get(2).ok_or("need playlist_id")?).map_err(|e| e.to_string())?;
+            let id =
+                RowId::parse(args.get(2).ok_or("need playlist_id")?).map_err(|e| e.to_string())?;
             let name = args.get(3).ok_or("need new name")?;
             repo.rename_playlist(&id, name).map_err(|e| e.to_string())?;
             println!("renamed to {name}");
         }
         Some("delete") => {
-            let id = RowId::parse(args.get(2).ok_or("need playlist_id")?).map_err(|e| e.to_string())?;
+            let id =
+                RowId::parse(args.get(2).ok_or("need playlist_id")?).map_err(|e| e.to_string())?;
             repo.delete_playlist(&id).map_err(|e| e.to_string())?;
             println!("deleted playlist");
         }
@@ -678,7 +718,9 @@ fn cmd_playlist_add(args: &[String]) -> Result<(), String> {
     let pid = RowId::parse(&args[1]).map_err(|e| e.to_string())?;
     for s in &args[2..] {
         let aid = parse_id(s)?;
-        let pos = repo.playlist_add_track(&pid, &aid).map_err(|e| e.to_string())?;
+        let pos = repo
+            .playlist_add_track(&pid, &aid)
+            .map_err(|e| e.to_string())?;
         println!("added {} at position {}", aid, pos);
     }
     Ok(())
@@ -692,7 +734,9 @@ fn cmd_playlist_remove(args: &[String]) -> Result<(), String> {
     let repo = Repo::new(&conn);
     let pid = RowId::parse(&args[1]).map_err(|e| e.to_string())?;
     let aid = parse_id(&args[2])?;
-    let ok = repo.playlist_remove_track(&pid, &aid).map_err(|e| e.to_string())?;
+    let ok = repo
+        .playlist_remove_track(&pid, &aid)
+        .map_err(|e| e.to_string())?;
     println!("{}", if ok { "removed" } else { "not in playlist" });
     Ok(())
 }
@@ -704,9 +748,14 @@ fn cmd_playlist_move(args: &[String]) -> Result<(), String> {
     let (_lib, conn) = open(&args[0])?;
     let repo = Repo::new(&conn);
     let pid = RowId::parse(&args[1]).map_err(|e| e.to_string())?;
-    let from: u32 = args[2].parse().map_err(|e: std::num::ParseIntError| e.to_string())?;
-    let to: u32 = args[3].parse().map_err(|e: std::num::ParseIntError| e.to_string())?;
-    repo.playlist_move_track(&pid, from, to).map_err(|e| e.to_string())?;
+    let from: u32 = args[2]
+        .parse()
+        .map_err(|e: std::num::ParseIntError| e.to_string())?;
+    let to: u32 = args[3]
+        .parse()
+        .map_err(|e: std::num::ParseIntError| e.to_string())?;
+    repo.playlist_move_track(&pid, from, to)
+        .map_err(|e| e.to_string())?;
     println!("moved {from} → {to}");
     Ok(())
 }
@@ -718,15 +767,22 @@ fn cmd_playlist_reorder(args: &[String]) -> Result<(), String> {
     let (_lib, conn) = open(&args[0])?;
     let repo = Repo::new(&conn);
     let pid = RowId::parse(&args[1]).map_err(|e| e.to_string())?;
-    let ids: Vec<AssetId> = args[2..].iter().map(|s| parse_id(s)).collect::<Result<_, _>>()?;
-    repo.playlist_reorder(&pid, &ids).map_err(|e| e.to_string())?;
+    let ids: Vec<AssetId> = args[2..]
+        .iter()
+        .map(|s| parse_id(s))
+        .collect::<Result<_, _>>()?;
+    repo.playlist_reorder(&pid, &ids)
+        .map_err(|e| e.to_string())?;
     println!("reordered {} track(s)", ids.len());
     Ok(())
 }
 
 // Silence unused import warning for evaluate when not used in all paths.
 #[allow(dead_code)]
-fn _touch_evaluate(conn: &rusqlite::Connection, rules: &SmartRules) -> soundhub_core::Result<Vec<AssetId>> {
+fn _touch_evaluate(
+    conn: &rusqlite::Connection,
+    rules: &SmartRules,
+) -> soundhub_core::Result<Vec<AssetId>> {
     let _ = collections::rules_to_value(rules);
     evaluate(conn, rules)
 }

@@ -51,9 +51,7 @@ pub fn search(conn: &rusqlite::Connection, query: &SearchQuery) -> Result<Vec<As
         );
         binds.push(Box::new(fts_query(raw)));
     } else {
-        sql.push_str(
-            "SELECT a.id FROM assets a WHERE a.status = 'ready' AND a.deleted_at IS NULL",
-        );
+        sql.push_str("SELECT a.id FROM assets a WHERE a.status = 'ready' AND a.deleted_at IS NULL");
     }
 
     if let Some(after) = query.recorded_after {

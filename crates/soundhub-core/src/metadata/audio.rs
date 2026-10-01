@@ -21,7 +21,8 @@ pub fn parse_aiff_header(path: &Path) -> Result<AudioMeta> {
             break;
         }
         let id = &chunk_hdr[0..4];
-        let size = u32::from_be_bytes([chunk_hdr[4], chunk_hdr[5], chunk_hdr[6], chunk_hdr[7]]) as usize;
+        let size =
+            u32::from_be_bytes([chunk_hdr[4], chunk_hdr[5], chunk_hdr[6], chunk_hdr[7]]) as usize;
         if id == b"COMM" {
             let mut data = vec![0u8; size.min(64)];
             r.read_exact(&mut data)?;
@@ -66,9 +67,8 @@ pub fn parse_flac_streaminfo(path: &Path) -> Result<AudioMeta> {
     }
     let mut block_hdr = [0u8; 4];
     r.read_exact(&mut block_hdr)?;
-    let length = ((block_hdr[1] as usize) << 16)
-        | ((block_hdr[2] as usize) << 8)
-        | (block_hdr[3] as usize);
+    let length =
+        ((block_hdr[1] as usize) << 16) | ((block_hdr[2] as usize) << 8) | (block_hdr[3] as usize);
     if length < 34 {
         return Err(Error::other("STREAMINFO too small"));
     }
@@ -78,7 +78,8 @@ pub fn parse_flac_streaminfo(path: &Path) -> Result<AudioMeta> {
     let min_block = u16::from_be_bytes([data[0], data[1]]);
     let max_block = u16::from_be_bytes([data[2], data[3]]);
     let _ = (min_block, max_block);
-    let sample_rate = ((data[10] as u32) << 12) | ((data[11] as u32) << 4) | ((data[12] as u32) >> 4);
+    let sample_rate =
+        ((data[10] as u32) << 12) | ((data[11] as u32) << 4) | ((data[12] as u32) >> 4);
     let channels = (((data[12] >> 1) & 0x07) + 1) as u16;
     let bit_depth = ((((data[12] & 0x01) as u16) << 4) | (((data[13] >> 4) & 0x0f) as u16)) + 1;
     let total_samples: u64 = (((data[13] & 0x0f) as u64) << 32)

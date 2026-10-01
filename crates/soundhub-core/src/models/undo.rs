@@ -72,7 +72,10 @@ pub struct UndoEntry {
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum UndoAction {
     /// Undo of `add_tag` → remove the tag.
-    RemoveTag { asset_id: String, tag_id: String },
+    RemoveTag {
+        asset_id: String,
+        tag_id: String,
+    },
     /// Undo of `remove_tag` → re-link the existing tag.
     AddTag {
         asset_id: String,
@@ -115,8 +118,12 @@ pub enum UndoAction {
         asset_id: String,
         collection_id: String,
     },
-    Restore { asset_id: String },
-    SoftDelete { asset_id: String },
+    Restore {
+        asset_id: String,
+    },
+    SoftDelete {
+        asset_id: String,
+    },
 }
 
 impl UndoAction {

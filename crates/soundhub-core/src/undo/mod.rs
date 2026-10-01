@@ -32,9 +32,11 @@ pub fn add_tag(conn: &Connection, asset_id: &AssetId, tag_name: &str) -> Result<
 pub fn remove_tag(conn: &Connection, asset_id: &AssetId, tag_id: &RowId) -> Result<()> {
     let repo = Repo::new(conn);
     let tag_name: Option<String> = conn
-        .query_row("SELECT name FROM tags WHERE id = ?1", [tag_id.as_str()], |r| {
-            r.get(0)
-        })
+        .query_row(
+            "SELECT name FROM tags WHERE id = ?1",
+            [tag_id.as_str()],
+            |r| r.get(0),
+        )
         .optional()?;
     repo.remove_asset_tag(asset_id, tag_id)?;
     let action = UndoAction::AddTag {
@@ -42,11 +44,7 @@ pub fn remove_tag(conn: &Connection, asset_id: &AssetId, tag_id: &RowId) -> Resu
         tag_id: tag_id.to_string(),
         tag_name: tag_name.unwrap_or_default(),
     };
-    repo.push_undo(
-        UndoKind::RemoveTag,
-        "Remove tag",
-        &action.to_value(),
-    )?;
+    repo.push_undo(UndoKind::RemoveTag, "Remove tag", &action.to_value())?;
     Ok(())
 }
 
@@ -300,11 +298,7 @@ fn apply_action(conn: &Connection, act: UndoAction) -> Result<()> {
             let to_id = RowId::parse(&to_tag_id)?;
             let tag = repo.upsert_tag(&from_tag_name)?;
             // Prefer the original id if the row still exists under that id.
-            let live_from = if tag.id == from_id {
-                from_id
-            } else {
-                tag.id
-            };
+            let live_from = if tag.id == from_id { from_id } else { tag.id };
             for s in asset_ids {
                 let aid = AssetId::parse(&s)?;
                 // These assets had the source tag; put it back and leave `to`.
@@ -335,11 +329,9 @@ fn apply_action(conn: &Connection, act: UndoAction) -> Result<()> {
                 // Re-create person with same id if it was purged — not supported;
                 // people rows are not deleted on unlink, so just re-link.
                 let exists: Option<String> = conn
-                    .query_row(
-                        "SELECT id FROM people WHERE id = ?1",
-                        [pid.as_str()],
-                        |r| r.get(0),
-                    )
+                    .query_row("SELECT id FROM people WHERE id = ?1", [pid.as_str()], |r| {
+                        r.get(0)
+                    })
                     .optional()?;
                 if exists.is_none() && !person_name.is_empty() {
                     // Fallback: create a new person (id will differ).
@@ -367,8 +359,7 @@ fn apply_action(conn: &Connection, act: UndoAction) -> Result<()> {
         }
         UndoAction::Restore { asset_id } => {
             let aid = AssetId::parse(&asset_id)?;
-            repo.restore_assets(&[aid])
-                .map(|_| ())
+            repo.restore_assets(&[aid]).map(|_| ())
         }
         UndoAction::SoftDelete { asset_id } => {
             let aid = AssetId::parse(&asset_id)?;

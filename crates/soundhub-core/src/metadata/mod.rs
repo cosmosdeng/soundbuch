@@ -11,7 +11,14 @@ use crate::models::{AudioMeta, FilesystemMeta, GpsMeta, MetadataSource, Metadata
 /// Returns raw JSON for anything we don't — never dropped.
 /// Parse problems go into `errors` and must NOT abort the import.
 /// A parser panic is caught so one bad file can never kill the process.
-pub fn extract(path: &Path) -> (AudioMeta, GpsMeta, BTreeMap<String, serde_json::Value>, Vec<String>) {
+pub fn extract(
+    path: &Path,
+) -> (
+    AudioMeta,
+    GpsMeta,
+    BTreeMap<String, serde_json::Value>,
+    Vec<String>,
+) {
     match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| extract_inner(path))) {
         Ok(v) => v,
         Err(_) => (
@@ -25,7 +32,12 @@ pub fn extract(path: &Path) -> (AudioMeta, GpsMeta, BTreeMap<String, serde_json:
 
 fn extract_inner(
     path: &Path,
-) -> (AudioMeta, GpsMeta, BTreeMap<String, serde_json::Value>, Vec<String>) {
+) -> (
+    AudioMeta,
+    GpsMeta,
+    BTreeMap<String, serde_json::Value>,
+    Vec<String>,
+) {
     let mut errors = Vec::new();
     let mut raw: BTreeMap<String, serde_json::Value> = BTreeMap::new();
 
@@ -155,20 +167,17 @@ pub fn filesystem_meta(path: &Path, meta: &std::fs::Metadata) -> FilesystemMeta 
         .created()
         .ok()
         .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
-        .map(|d| chrono::DateTime::from_timestamp(d.as_secs() as i64, 0))
-        .flatten();
+        .and_then(|d| chrono::DateTime::from_timestamp(d.as_secs() as i64, 0));
     let modified_at = meta
         .modified()
         .ok()
         .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
-        .map(|d| chrono::DateTime::from_timestamp(d.as_secs() as i64, 0))
-        .flatten();
+        .and_then(|d| chrono::DateTime::from_timestamp(d.as_secs() as i64, 0));
     let accessed_at = meta
         .accessed()
         .ok()
         .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
-        .map(|d| chrono::DateTime::from_timestamp(d.as_secs() as i64, 0))
-        .flatten();
+        .and_then(|d| chrono::DateTime::from_timestamp(d.as_secs() as i64, 0));
 
     FilesystemMeta {
         filename,

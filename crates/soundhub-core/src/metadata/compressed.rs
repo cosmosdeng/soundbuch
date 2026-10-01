@@ -18,12 +18,20 @@ use crate::models::AudioMeta;
 
 const MP3_BITRATE_KBPS: [[u32; 15]; 6] = [
     // Rows: MPEG1 L3, MPEG1 L2, MPEG1 L1, MPEG2/2.5 L3, MPEG2/2.5 L2, MPEG2/2.5 L1
-    [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320],
-    [0, 32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384],
-    [0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448],
+    [
+        0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320,
+    ],
+    [
+        0, 32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384,
+    ],
+    [
+        0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448,
+    ],
     [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160],
     [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160],
-    [0, 32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 192, 224, 256],
+    [
+        0, 32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 192, 224, 256,
+    ],
 ];
 
 const MP3_SAMPLE_RATES: [[u32; 3]; 3] = [
@@ -345,7 +353,9 @@ fn decode_id3_text(encoding: u8, b: &[u8]) -> String {
                 (true, b)
             };
             let units: Vec<u16> = slice
-                .chunks_exact(2)
+                .as_chunks::<2>()
+                .0
+                .iter()
                 .map(|c| {
                     if be {
                         u16::from_be_bytes([c[0], c[1]])
@@ -443,9 +453,7 @@ fn walk_mp4_boxes<R: Read + Seek>(
             }
             "ftyp" => {
                 let mut brand = [0u8; 4];
-                if r.seek(SeekFrom::Start(body_start)).is_ok()
-                    && r.read_exact(&mut brand).is_ok()
-                {
+                if r.seek(SeekFrom::Start(body_start)).is_ok() && r.read_exact(&mut brand).is_ok() {
                     raw.insert(
                         "mp4_brand".into(),
                         serde_json::json!(String::from_utf8_lossy(&brand)),
@@ -467,12 +475,7 @@ fn walk_mp4_boxes<R: Read + Seek>(
     Ok(())
 }
 
-fn read_mvhd<R: Read + Seek>(
-    r: &mut R,
-    start: u64,
-    end: u64,
-    audio: &mut AudioMeta,
-) -> Result<()> {
+fn read_mvhd<R: Read + Seek>(r: &mut R, start: u64, end: u64, audio: &mut AudioMeta) -> Result<()> {
     r.seek(SeekFrom::Start(start))?;
     let mut buf = [0u8; 32];
     let n = r.read(&mut buf)?;
@@ -619,7 +622,8 @@ pub fn parse_caf(path: &Path) -> Result<AudioMeta> {
                 let format_id = String::from_utf8_lossy(&data[8..12]).to_string();
                 let flags = u32::from_be_bytes([data[12], data[13], data[14], data[15]]);
                 let bytes_per_packet = u32::from_be_bytes([data[16], data[17], data[18], data[19]]);
-                let frames_per_packet = u32::from_be_bytes([data[20], data[21], data[22], data[23]]);
+                let frames_per_packet =
+                    u32::from_be_bytes([data[20], data[21], data[22], data[23]]);
                 let channels = u32::from_be_bytes([data[24], data[25], data[26], data[27]]);
                 let bits = u32::from_be_bytes([data[28], data[29], data[30], data[31]]);
                 if sample_rate > 0.0 {
@@ -672,7 +676,8 @@ mod tests {
         // ID3v2 empty tag
         f.write_all(b"ID3\x03\x00\x00\x00\x00\x00\x00").unwrap();
         // Frame header: FF FB 90 00 → MPEG1 L3, bitrate idx 9 (128k), 44100, stereo
-        f.write_all(&[0xFF, 0xFB, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00]).unwrap();
+        f.write_all(&[0xFF, 0xFB, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00])
+            .unwrap();
         // pad some "audio" so duration estimate is non-zero
         for i in 0..4096u32 {
             f.write_all(&[(i % 251) as u8]).unwrap();
@@ -708,7 +713,8 @@ mod tests {
         f.write_all(b"ID3\x03\x00\x00").unwrap();
         f.write_all(&synchsafe_bytes(body.len() as u32)).unwrap();
         f.write_all(&body).unwrap();
-        f.write_all(&[0xFF, 0xFB, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00]).unwrap();
+        f.write_all(&[0xFF, 0xFB, 0x90, 0x00, 0x00, 0x00, 0x00, 0x00])
+            .unwrap();
         for _ in 0..1024 {
             f.write_all(&[0u8]).unwrap();
         }

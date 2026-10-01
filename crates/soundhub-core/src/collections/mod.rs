@@ -56,15 +56,15 @@ fn compile_condition(
     cond: &SmartCondition,
 ) -> Result<()> {
     let as_str = |v: &serde_json::Value| -> String {
-        v.as_str().map(|s| s.to_string()).unwrap_or_else(|| v.to_string())
+        v.as_str()
+            .map(|s| s.to_string())
+            .unwrap_or_else(|| v.to_string())
     };
 
     match (cond.field, cond.op) {
         (SmartField::Text, SmartOp::Contains | SmartOp::Is) => {
             let q = as_str(&cond.value);
-            sql.push_str(
-                "a.id IN (SELECT asset_id FROM assets_fts WHERE assets_fts MATCH ?)",
-            );
+            sql.push_str("a.id IN (SELECT asset_id FROM assets_fts WHERE assets_fts MATCH ?)");
             binds.push(Box::new(q));
         }
         (SmartField::Filename, SmartOp::Contains) => {
@@ -141,7 +141,7 @@ fn compile_condition(
         _ => {
             // Unsupported field/op pair — treat as never-match rather than
             // silently widening the result set.
-            sql.push_str("0");
+            sql.push('0');
         }
     }
     Ok(())

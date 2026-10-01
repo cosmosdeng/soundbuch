@@ -11,12 +11,14 @@ pub fn migrate(conn: &Connection) -> Result<()> {
     conn.execute_batch("PRAGMA synchronous = NORMAL;")?;
 
     // Ensure the version table exists first so we can read the stored version.
-    conn.execute_batch(
-        "CREATE TABLE IF NOT EXISTS schema_version (version INTEGER NOT NULL);",
-    )?;
+    conn.execute_batch("CREATE TABLE IF NOT EXISTS schema_version (version INTEGER NOT NULL);")?;
 
     let stored: i64 = conn
-        .query_row("SELECT COALESCE(MAX(version), 0) FROM schema_version", [], |r| r.get(0))
+        .query_row(
+            "SELECT COALESCE(MAX(version), 0) FROM schema_version",
+            [],
+            |r| r.get(0),
+        )
         .unwrap_or(0);
 
     if stored > SCHEMA_VERSION {
@@ -47,10 +49,7 @@ pub fn migrate(conn: &Connection) -> Result<()> {
             upgrade_v4_to_v5(conn)?;
         }
         // Future upgrades: if stored < 6 { upgrade_v5_to_v6(conn)?; } ...
-        conn.execute(
-            "UPDATE schema_version SET version = ?1",
-            [SCHEMA_VERSION],
-        )?;
+        conn.execute("UPDATE schema_version SET version = ?1", [SCHEMA_VERSION])?;
     }
 
     Ok(())
@@ -356,9 +355,11 @@ mod tests {
     use rusqlite::params;
 
     fn stored_version(conn: &Connection) -> i64 {
-        conn.query_row("SELECT COALESCE(MAX(version), 0) FROM schema_version", [], |r| {
-            r.get(0)
-        })
+        conn.query_row(
+            "SELECT COALESCE(MAX(version), 0) FROM schema_version",
+            [],
+            |r| r.get(0),
+        )
         .unwrap()
     }
 
@@ -519,9 +520,7 @@ mod tests {
             let mut stmt = conn
                 .prepare("SELECT id, status FROM import_files ORDER BY id")
                 .unwrap();
-            let mapped = stmt
-                .query_map([], |r| Ok((r.get(0)?, r.get(1)?)))
-                .unwrap();
+            let mapped = stmt.query_map([], |r| Ok((r.get(0)?, r.get(1)?))).unwrap();
             mapped.collect::<std::result::Result<Vec<_>, _>>().unwrap()
         };
         assert_eq!(
@@ -538,7 +537,10 @@ mod tests {
              VALUES ('f4', 'job1', '/src/a.wav', 'pending')",
             params![],
         );
-        assert!(dup.is_err(), "unique index must reject duplicate (job, path)");
+        assert!(
+            dup.is_err(),
+            "unique index must reject duplicate (job, path)"
+        );
     }
 
     #[test]

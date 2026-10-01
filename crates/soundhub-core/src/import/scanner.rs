@@ -93,10 +93,7 @@ fn scan_one(path: &Path) -> ScannedFile {
 }
 
 /// Mark scan entries whose SHA-256 already exists in the library.
-pub fn annotate_duplicates(
-    summary: &mut ScanSummary,
-    existing: &dyn Fn(&str) -> Option<String>,
-) {
+pub fn annotate_duplicates(summary: &mut ScanSummary, existing: &dyn Fn(&str) -> Option<String>) {
     for f in summary.files.iter_mut() {
         if let Some(hash) = f.hash.clone() {
             if let Some(existing_id) = existing(&hash) {

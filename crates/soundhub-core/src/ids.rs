@@ -96,7 +96,7 @@ pub fn ulid_simple() -> String {
     let mut time = [0u8; 10];
     let mut t = ms;
     for i in (0..10).rev() {
-        time[i] = ENCODING[(t & 0x1f) as usize] as u8;
+        time[i] = ENCODING[(t & 0x1f) as usize];
         t >>= 5;
     }
 
@@ -110,7 +110,7 @@ pub fn ulid_simple() -> String {
 
     let mut rand = [0u8; 16];
     for (i, b) in rand.iter_mut().enumerate() {
-        *b = ENCODING[(digest[i] as usize) & 0x1f] as u8;
+        *b = ENCODING[(digest[i] as usize) & 0x1f];
     }
 
     let mut out = String::with_capacity(26);
