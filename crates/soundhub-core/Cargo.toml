@@ -1,0 +1,22 @@
+[package]
+name = "soundhub-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "soundbuch library core: assets, import pipeline, metadata, search"
+
+[dependencies]
+anyhow.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+sha2.workspace = true
+hex.workspace = true
+rusqlite.workspace = true
+walkdir.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

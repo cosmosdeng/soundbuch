@@ -1,0 +1,29 @@
+[package]
+name = "soundhub"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "soundbuch desktop application"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+soundhub-core = { path = "../crates/soundhub-core" }
+rusqlite.workspace = true
+dirs = "5"
+tauri = { version = "2", features = ["protocol-asset"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+rfd = "0.15"
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

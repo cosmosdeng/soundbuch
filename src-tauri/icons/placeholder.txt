@@ -1,0 +1,2 @@
+// Placeholder — Tauri CLI generates real icons at build/package time.
+fn main() {}

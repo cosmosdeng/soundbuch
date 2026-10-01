@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>soundbuch</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- First-run: pick / create Library -->
+  <div id="setup-screen" class="screen">
+    <div class="setup-shell">
+      <header class="setup-header">
+        <div class="setup-brand">
+          <div class="logo-mark">SH</div>
+          <div>
+            <div class="logo-text">soundbuch</div>
+            <div class="logo-sub" data-i18n="tagline">Sound asset library</div>
+          </div>
+        </div>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" class="lang-btn active" data-lang="en">EN</button>
+          <button type="button" class="lang-btn" data-lang="zh">中文</button>
+        </div>
+      </header>
+
+      <!-- Step: choose action -->
+      <section id="setup-step-choose" class="setup-step">
+        <h1 data-i18n="setupTitle">Where is your Library?</h1>
+        <p class="muted setup-lead" data-i18n="setupLead">
+          soundbuch keeps your recordings in one place. Original files are copied in — never modified.
+        </p>
+
+        <div class="choice-grid">
+          <button type="button" class="choice-card" id="choice-create">
+            <div class="choice-icon">＋</div>
+            <div class="choice-title" data-i18n="createTitle">Create new Library</div>
+            <div class="choice-desc" data-i18n="createDesc">
+              Pick a folder on an internal disk, SSD, or external drive.
+            </div>
+          </button>
+          <button type="button" class="choice-card" id="choice-open">
+            <div class="choice-icon">⤓</div>
+            <div class="choice-title" data-i18n="openTitle">Open existing Library</div>
+            <div class="choice-desc" data-i18n="openDesc">
+              Open a Library you created earlier (contains library.db).
+            </div>
+          </button>
+        </div>
+
+        <div id="recent-block" class="recent-block hidden">
+          <div class="section-label" data-i18n="recentTitle">Recent Libraries</div>
+          <ul id="recent-list" class="recent-list"></ul>
+        </div>
+      </section>
+
+      <!-- Step: create -->
+      <section id="setup-step-create" class="setup-step hidden">
+        <button type="button" class="back-link" data-back="choose">← <span data-i18n="back">Back</span></button>
+        <h2 data-i18n="createTitle">Create new Library</h2>
+        <p class="muted" data-i18n="createLead">Choose where to store your sound assets.</p>
+
+        <div class="field-row">
+          <label data-i18n="parentFolder">Parent folder</label>
+          <div class="path-row">
+            <input id="create-parent" type="text" readonly placeholder="—" />
+            <button type="button" id="btn-pick-parent" data-i18n="browse">Browse…</button>
+          </div>
+          <div id="suggest-locations" class="suggest-row"></div>
+        </div>
+
+        <div class="field-row">
+          <label data-i18n="libraryName">Library name</label>
+          <div class="path-row">
+            <input id="create-name" type="text" value="soundbuch" maxlength="64" />
+          </div>
+          <div class="hint" data-i18n="nameHint">Leave empty to use the folder itself as the Library.</div>
+        </div>
+
+        <div class="preview-box">
+          <div class="section-label" data-i18n="willCreate">Will create</div>
+          <div id="create-fullpath" class="mono path-preview">—</div>
+          <ul id="create-preview" class="file-preview">
+            <li class="muted">—</li>
+          </ul>
+        </div>
+
+        <div id="create-warning" class="warn hidden"></div>
+
+        <div class="setup-actions">
+          <button type="button" class="primary" id="btn-confirm-create" disabled>
+            <span data-i18n="createConfirm">Create Library</span>
+          </button>
+          <button type="button" class="ghost" data-back="choose" data-i18n="back">Back</button>
+        </div>
+        <p id="create-status" class="status-msg"></p>
+      </section>
+
+      <!-- Step: open -->
+      <section id="setup-step-open" class="setup-step hidden">
+        <button type="button" class="back-link" data-back="choose">← <span data-i18n="back">Back</span></button>
+        <h2 data-i18n="openTitle">Open existing Library</h2>
+        <p class="muted" data-i18n="openLead">Select the folder that contains your soundbuch Library.</p>
+
+        <div class="field-row">
+          <label data-i18n="libraryFolder">Library folder</label>
+          <div class="path-row">
+            <input id="open-path" type="text" readonly placeholder="—" />
+            <button type="button" id="btn-pick-open" data-i18n="browse">Browse…</button>
+          </div>
+        </div>
+
+        <div id="open-inspect" class="preview-box hidden">
+          <div class="inspect-grid">
+            <div>
+              <div class="section-label" data-i18n="status">Status</div>
+              <div id="open-status" class="inspect-value">—</div>
+            </div>
+            <div>
+              <div class="section-label" data-i18n="assets">Assets</div>
+              <div id="open-assets" class="inspect-value">—</div>
+            </div>
+            <div>
+              <div class="section-label" data-i18n="database">Database</div>
+              <div id="open-db" class="inspect-value">—</div>
+            </div>
+          </div>
+          <div id="open-error" class="warn hidden"></div>
+        </div>
+
+        <div class="setup-actions">
+          <button type="button" class="primary" id="btn-confirm-open" disabled>
+            <span data-i18n="openConfirm">Open Library</span>
+          </button>
+          <button type="button" class="ghost" data-back="choose" data-i18n="back">Back</button>
+        </div>
+        <p id="open-status-msg" class="status-msg"></p>
+      </section>
+    </div>
+  </div>
+
+  <!-- Main app -->
+  <div id="app-screen" class="screen hidden">
+    <header class="topbar">
+      <div class="brand">soundbuch</div>
+      <div class="search-wrap">
+        <input id="search-input" type="search" placeholder="Search filename, tag, person, location…" />
+        <button id="btn-search" class="ghost">Search</button>
+      </div>
+      <div class="library-label" id="library-label"></div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <nav>
+          <button class="nav-item active" data-view="all">All Sounds</button>
+          <button class="nav-item" data-view="recent">Recent</button>
+          <button class="nav-item" data-view="map">Map</button>
+          <button class="nav-item" data-view="trash">Recycle Bin</button>
+          <button class="nav-item" data-view="dupes">Duplicates</button>
+          <button class="nav-item" data-view="playlists">Playlists</button>
+        </nav>
+        <div class="sidebar-section">
+          <div class="sidebar-title">Collections</div>
+          <div id="collection-list" class="chip-list"></div>
+          <div class="import-actions">
+            <button id="btn-new-collection" class="ghost small">+ Collection</button>
+            <button id="btn-new-smart" class="ghost small">+ Smart</button>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">Tags</div>
+          <div class="import-actions" style="margin-bottom:6px">
+            <select id="tag-match-mode" title="How multiple tags combine">
+              <option value="all">Tags: ALL</option>
+              <option value="any">Tags: ANY</option>
+            </select>
+            <button id="btn-tag-manager" class="ghost small">Manage</button>
+          </div>
+          <div id="tag-list" class="chip-list"></div>
+          <div id="tag-manager" class="hidden" style="margin-top:8px;font-size:12px"></div>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="toolbar">
+          <button id="btn-import" class="primary">Import</button>
+          <button id="btn-recovery" class="ghost hidden">Resume Incomplete</button>
+          <button id="btn-multi" class="ghost" title="Multi-select for batch edit">Multi-select</button>
+          <button id="btn-delete" class="ghost" title="Move selection to recycle bin">Delete</button>
+          <button id="btn-undo" class="ghost" title="Undo last action">↩ Undo</button>
+          <button id="btn-empty-trash" class="ghost hidden" title="Permanently delete all trashed items">Empty Bin</button>
+          <span id="asset-count" class="muted"></span>
+        </div>
+
+        <div id="trash-bar" class="toolbar hidden">
+          <span class="muted">Recycle bin — restore or permanently delete</span>
+          <button id="trash-restore" class="ghost small">Restore selected</button>
+          <button id="trash-purge" class="ghost small">Delete forever</button>
+        </div>
+
+        <div id="dupes-bar" class="toolbar hidden">
+          <span class="muted">Content-identical copies (SHA-256)</span>
+          <select id="dedupe-strategy">
+            <option value="oldest">Keep oldest</option>
+            <option value="newest">Keep newest</option>
+            <option value="lowest-id">Keep lowest id</option>
+          </select>
+          <button id="btn-dedupe" class="ghost small">Clean all groups</button>
+        </div>
+
+        <div id="playlist-bar" class="toolbar hidden">
+          <select id="playlist-select"></select>
+          <button id="btn-new-playlist" class="ghost small">+ New</button>
+          <button id="pl-add-selected" class="ghost small">Add selected</button>
+          <input id="playlist-name" type="text" placeholder="Playlist name" class="hidden" />
+        </div>
+
+        <div id="batch-bar" class="toolbar hidden">
+          <span id="batch-count" class="muted">0 selected</span>
+          <input id="batch-tag" type="text" placeholder="Tag name" />
+          <button id="batch-add-tag" class="ghost small">+ Tag</button>
+          <button id="batch-remove-tag" class="ghost small">− Tag</button>
+          <input id="batch-person" type="text" placeholder="Person name" />
+          <button id="batch-add-person" class="ghost small">+ Person</button>
+          <select id="batch-collection">
+            <option value="">Collection…</option>
+          </select>
+          <button id="batch-add-col" class="ghost small">+ Col</button>
+          <button id="batch-remove-col" class="ghost small">− Col</button>
+          <button id="batch-clear" class="ghost small">Clear</button>
+        </div>
+
+        <div class="browser-and-detail">
+          <section class="browser">
+            <table class="asset-table">
+              <thead>
+                <tr>
+                  <th class="col-check hidden">✓</th>
+                  <th>Filename</th>
+                  <th>Duration</th>
+                  <th>Format</th>
+                  <th>Recorded</th>
+                  <th>Size</th>
+                </tr>
+              </thead>
+              <tbody id="asset-rows"></tbody>
+            </table>
+            <div id="empty-state" class="empty hidden">
+              No sounds yet. Click <strong>Import</strong> to add files.
+            </div>
+            <div id="map-panel" class="hidden" style="padding:12px">
+              <div class="section-label">GPS assets — click a point to select</div>
+              <canvas id="map-canvas" width="800" height="420" style="width:100%;background:#0b1220;border:1px solid #243044;border-radius:8px"></canvas>
+              <div id="map-legend" class="muted" style="margin-top:8px"></div>
+            </div>
+          </section>
+
+          <aside class="detail" id="detail-panel">
+            <div class="empty">Select a sound to see details.</div>
+          </aside>
+        </div>
+      </main>
+    </div>
+
+    <!-- Import dialog -->
+    <div id="import-modal" class="modal hidden">
+      <div class="modal-card">
+        <h2>Import Audio</h2>
+        <div class="import-drop" id="import-drop">
+          <p>Drop files or folders here</p>
+          <div class="import-actions">
+            <button id="btn-select-files">Select Files…</button>
+            <button id="btn-select-folder">Select Folder…</button>
+          </div>
+          <div class="add-row" style="margin-top:12px">
+            <input id="manual-path" type="text" placeholder="Or type a full file/folder path…" />
+            <button type="button" id="btn-add-path">Scan</button>
+          </div>
+        </div>
+        <div id="scan-result" class="scan-result hidden"></div>
+        <p id="import-status" class="status-msg"></p>
+        <div class="modal-actions">
+          <select id="duplicate-action">
+            <option value="skip">Duplicate: Skip (default)</option>
+            <option value="import_as_duplicate">Duplicate: Import as duplicate</option>
+            <option value="cancel">Duplicate: Cancel</option>
+          </select>
+          <button id="btn-start-import" class="primary hidden">Import</button>
+          <button id="btn-close-import">Close</button>
+        </div>
+        <div id="import-progress" class="progress hidden"></div>
+      </div>
+    </div>
+
+    <!-- Recovery dialog -->
+    <div id="recovery-modal" class="modal hidden">
+      <div class="modal-card">
+        <h2>Unfinished Imports</h2>
+        <div id="recovery-list"></div>
+        <div class="modal-actions">
+          <button id="btn-close-recovery">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Smart collection dialog -->
+    <div id="smart-modal" class="modal hidden">
+      <div class="modal-card">
+        <h2>New Smart Collection</h2>
+        <div class="field-row">
+          <label>Name</label>
+          <input id="smart-name" type="text" placeholder="e.g. Field HD" />
+        </div>
+        <div class="field-row">
+          <label>Match</label>
+          <select id="smart-match">
+            <option value="all">All conditions (AND)</option>
+            <option value="any">Any condition (OR)</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <label>Condition</label>
+          <div class="path-row">
+            <select id="smart-field">
+              <option value="tag">Tag</option>
+              <option value="person">Person</option>
+              <option value="filename">Filename contains</option>
+              <option value="text">Full-text</option>
+              <option value="sample_rate">Sample rate</option>
+              <option value="has_gps">Has GPS</option>
+              <option value="recorded_after">Recorded after</option>
+            </select>
+            <select id="smart-op">
+              <option value="is">is</option>
+              <option value="is_not">is not</option>
+              <option value="contains">contains</option>
+              <option value="eq">=</option>
+              <option value="gte">≥</option>
+              <option value="lte">≤</option>
+            </select>
+            <input id="smart-value" type="text" placeholder="value" />
+          </div>
+        </div>
+        <p class="hint">One condition per collection for now. JSON rules can be extended later.</p>
+        <div class="modal-actions">
+          <button id="btn-save-smart" class="primary">Create</button>
+          <button id="btn-close-smart">Cancel</button>
+        </div>
+        <p id="smart-status" class="status-msg"></p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
