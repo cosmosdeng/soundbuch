@@ -103,46 +103,98 @@ Values carry `metadata_source` (`filesystem` / `bwf` / `ixml` / `user` / …). U
 
 ## Development
 
-### Prerequisites
+**Main development environment:** Ubuntu (Dell 7865)  
+**Supported desktop platforms:** Windows / macOS / Linux
 
-- Rust stable (`rustup`)
-- VS Build Tools (Windows) or Xcode CLT (macOS) / `build-essential` (Linux)
-- Linux (Ubuntu/Debian) Tauri deps:
-  `sudo apt install libdbus-1-dev libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev pkg-config`
-- Node.js is optional (no JS bundler in MVP)
+The repository is a Rust workspace with a platform-agnostic core and a Tauri 2
+desktop shell. The frontend is static HTML/CSS/JS — no bundler, no Node build.
 
-### Commands
+### Ubuntu local development
 
 ```bash
-# Core tests (unit + integration)
-cargo test -p soundhub-core
+# one-time system packages (Tauri / WebKit)
+sudo apt install libdbus-1-dev libwebkit2gtk-4.1-dev libgtk-3-dev \
+  libayatana-appindicator3-dev librsvg2-dev pkg-config
 
-# Desktop app (debug)
+# tests
+cargo test --workspace
+cargo fmt --check
+cargo clippy --workspace --all-targets
+
+# run the desktop app (debug)
 cargo run -p soundhub
-# or: scripts/run-local.sh
 
-# Headless CLI smoke test (no GUI needed)
-scripts/smoke-test.sh
-# individual commands:
+# headless CLI (cross-platform binary)
 cargo run -p soundhub-cli -- help
-cargo run -p soundhub-cli -- init /tmp/my-lib
-cargo run -p soundhub-cli -- import /tmp/my-lib ./samples
-
-# Release
-cargo build -p soundhub --release
+cargo run -p soundhub-cli -- init ./my-library
+cargo run -p soundhub-cli -- import ./my-library ./some-wavs
 ```
+
+### Linux/macOS development helpers
+
+These scripts are **not** used by CI and are not required on Windows:
+
+| Script | Purpose |
+|--------|---------|
+| `scripts/run-local.sh` | build + launch desktop app |
+| `scripts/smoke-test.sh` | end-to-end CLI smoke test |
+| `scripts/make-samples.py` | generate small WAV files |
+
+On Windows, use the `cargo run -p soundhub-cli` commands above instead.
+
+### GitHub Actions (test + build)
+
+```
+git push
+   ↓
+GitHub Actions  (fmt → clippy → test → tauri build)
+   ↓
+Artifacts: soundbuch-linux-x64 / soundbuch-windows-x64 / soundbuch-macos-arm64
+```
+
+Workflow: `.github/workflows/build.yml`  
+Triggers: `push` to `main`, or `workflow_dispatch` (Actions → CI → Run workflow).
+
+**Download a test build (no Rust/Node required for testers):**
+
+1. Open https://github.com/cosmosdeng/soundbuch/actions
+2. Click the latest successful **CI** run
+3. Download the artifact for your OS:
+   - Windows → `soundbuch-windows-x64`
+   - Mac (Apple Silicon) → `soundbuch-macos-arm64`
+   - Linux → `soundbuch-linux-x64`
+4. Unzip and install/run.
+
+**macOS note:** these are **unsigned test builds**. Gatekeeper may block the app.
+
+> This is an unsigned test build.  
+> macOS may require the user to approve the application in **Privacy & Security**  
+> or open it manually through **Finder** (right-click → Open).
+
+Apple Developer ID signing / notarization is intentionally not configured yet.
 
 ### Workspace layout
 
 ```
-soundhub/
+soundbuch/
 ├── Cargo.toml                 # workspace
-├── crates/soundhub-core/      # pure logic, fully tested
-│   ├── src/{db,import,library,metadata,models,search}
+├── crates/soundhub-core/      # pure cross-platform logic (no Tauri/GUI)
+│   ├── src/{audio,db,duplicates,import,library,metadata,models,search,undo}
 │   └── tests/
-├── src-tauri/                 # Tauri 2 desktop shell
-└── src/                       # static frontend
+├── crates/soundhub-cli/       # headless CLI for scripts and CI-friendly tests
+├── src-tauri/                 # Tauri 2 desktop shell (platform glue)
+├── src/                       # static frontend (index.html / main.js / styles.css)
+└── .github/workflows/build.yml
 ```
+
+### Cross-platform notes
+
+- Library layout is portable: stored relative paths always use `/` and are
+  resolved with `Path::join` (works on Windows, macOS, Linux).
+- External volumes (`D:\`, `/Volumes/…`, `/media/…`, `/mnt/…`, network mounts)
+  are supported as import source and Library location.
+- Unicode filenames (CJK, spaces, hyphens, long names) are covered by tests.
+- No external CLI tools (ffmpeg/ffprobe) are required at runtime.
 
 ---
 

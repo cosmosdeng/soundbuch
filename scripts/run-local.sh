@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Launch soundbuch desktop app (Linux).
+# Linux/macOS development helper — not used by CI.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"

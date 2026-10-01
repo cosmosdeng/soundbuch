@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # End-to-end headless smoke test for soundbuch core on this machine.
+# Linux/macOS development helper — CI does not run this script.
+# On Windows use: cargo run -p soundhub-cli -- help
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
