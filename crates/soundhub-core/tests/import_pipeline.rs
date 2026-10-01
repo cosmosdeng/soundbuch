@@ -4,6 +4,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
+use soundhub_core::db::Repo;
 use soundhub_core::import::{hash_file, ImportPipeline};
 use soundhub_core::library::Library;
 use soundhub_core::models::{AssetStatus, DuplicateAction};
@@ -55,7 +56,7 @@ fn test_02_single_file_import() {
     let pipeline = ImportPipeline::new(&library, &conn);
 
     let result = pipeline
-        .import_paths(&[wav.clone()], DuplicateAction::Skip)
+        .import_paths(std::slice::from_ref(&wav), DuplicateAction::Skip)
         .unwrap();
     assert_eq!(result.success, 1, "{:?}", result.files);
     assert_eq!(result.failed, 0);
@@ -92,7 +93,13 @@ fn test_03_folder_with_many_files() {
     std::fs::create_dir_all(&src_dir).unwrap();
     for i in 0..100 {
         // Distinct frame counts so every hash differs.
-        write_min_wav(&src_dir.join(format!("{i:05}.wav")), 48000, 1, 16, 100 + i as u32);
+        write_min_wav(
+            &src_dir.join(format!("{i:05}.wav")),
+            48000,
+            1,
+            16,
+            100 + i as u32,
+        );
     }
 
     let lib_dir = tmp.path().join("Library");
@@ -119,7 +126,13 @@ fn test_04_recursive_subdirectories() {
     std::fs::create_dir_all(root.join("A")).unwrap();
     std::fs::create_dir_all(root.join("B").join("C")).unwrap();
     write_min_wav(&root.join("A").join("001.wav"), 48000, 2, 24, 4800);
-    write_min_wav(&root.join("B").join("C").join("002.wav"), 44100, 1, 16, 2205);
+    write_min_wav(
+        &root.join("B").join("C").join("002.wav"),
+        44100,
+        1,
+        16,
+        2205,
+    );
 
     let lib_dir = tmp.path().join("Library");
     let (library, conn) = setup_library(&lib_dir);
@@ -143,7 +156,7 @@ fn test_05_duplicate_detection_by_sha256() {
     let pipeline = ImportPipeline::new(&library, &conn);
 
     let first = pipeline
-        .import_paths(&[wav.clone()], DuplicateAction::Skip)
+        .import_paths(std::slice::from_ref(&wav), DuplicateAction::Skip)
         .unwrap();
     assert_eq!(first.success, 1);
 
@@ -178,7 +191,7 @@ fn test_06_external_source_can_be_removed_after_import() {
     let (library, conn) = setup_library(&lib_dir);
     let pipeline = ImportPipeline::new(&library, &conn);
     let result = pipeline
-        .import_paths(&[wav.clone()], DuplicateAction::Skip)
+        .import_paths(std::slice::from_ref(&wav), DuplicateAction::Skip)
         .unwrap();
     let asset_id = AssetId::parse(result.files[0].asset_id.as_ref().unwrap()).unwrap();
 
@@ -299,7 +312,7 @@ fn cleanup_incomplete_discards_partial_but_keeps_ready() {
 
     // Fully import one asset first — this must survive cleanup.
     let ok = pipeline
-        .import_paths(&[good.clone()], DuplicateAction::Skip)
+        .import_paths(std::slice::from_ref(&good), DuplicateAction::Skip)
         .unwrap();
     assert_eq!(ok.success, 1);
     let ready_id = AssetId::parse(ok.files[0].asset_id.as_ref().unwrap()).unwrap();
@@ -443,15 +456,23 @@ fn import_reports_progress_per_file() {
     let calls = Arc::new(AtomicU32::new(0));
     let c2 = calls.clone();
     let result = pipeline
-        .import_paths_with_progress(&[src_dir], DuplicateAction::Skip, &move |processed, total, _cur| {
-            c2.fetch_add(1, Ordering::SeqCst);
-            assert!(processed <= total);
-            assert_eq!(total, 3);
-        })
+        .import_paths_with_progress(
+            &[src_dir],
+            DuplicateAction::Skip,
+            &move |processed, total, _cur| {
+                c2.fetch_add(1, Ordering::SeqCst);
+                assert!(processed <= total);
+                assert_eq!(total, 3);
+            },
+        )
         .unwrap();
 
     assert_eq!(result.success, 3);
-    assert_eq!(calls.load(Ordering::SeqCst), 3, "one progress tick per file");
+    assert_eq!(
+        calls.load(Ordering::SeqCst),
+        3,
+        "one progress tick per file"
+    );
 }
 
 #[test]
@@ -468,8 +489,12 @@ fn asset_identity_is_id_not_filename() {
     let lib_dir = tmp.path().join("Library");
     let (library, conn) = setup_library(&lib_dir);
     let pipeline = ImportPipeline::new(&library, &conn);
-    let r1 = pipeline.import_paths(&[a_dir], DuplicateAction::Skip).unwrap();
-    let r2 = pipeline.import_paths(&[b_dir], DuplicateAction::Skip).unwrap();
+    let r1 = pipeline
+        .import_paths(&[a_dir], DuplicateAction::Skip)
+        .unwrap();
+    let r2 = pipeline
+        .import_paths(&[b_dir], DuplicateAction::Skip)
+        .unwrap();
     assert_eq!(r1.success, 1);
     assert_eq!(r2.success, 1);
 
@@ -501,7 +526,9 @@ fn collection_membership_does_not_copy_file() {
     let lib_dir = tmp.path().join("Library");
     let (library, conn) = setup_library(&lib_dir);
     let pipeline = ImportPipeline::new(&library, &conn);
-    let result = pipeline.import_paths(&[wav], DuplicateAction::Skip).unwrap();
+    let result = pipeline
+        .import_paths(&[wav], DuplicateAction::Skip)
+        .unwrap();
     let asset_id = AssetId::parse(result.files[0].asset_id.as_ref().unwrap()).unwrap();
 
     let repo = Repo::new(&conn);
@@ -525,7 +552,8 @@ fn collection_membership_does_not_copy_file() {
     assert_eq!(count, 1, "collections must not duplicate files");
 
     // Removing from a collection must not delete the asset.
-    repo.remove_asset_from_collection(&asset_id, &c1.id).unwrap();
+    repo.remove_asset_from_collection(&asset_id, &c1.id)
+        .unwrap();
     assert!(dest.exists());
     assert!(repo.get_asset(&asset_id).unwrap().is_some());
 }
@@ -555,7 +583,11 @@ fn import_file_record_lifecycle_one_row_per_file() {
     let repo = Repo::new(&conn);
     let job_id = RowId::parse(&result.job_id).unwrap();
     let files = repo.list_import_files(&job_id).unwrap();
-    assert_eq!(files.len(), 3, "exactly one record per scanned file: {files:?}");
+    assert_eq!(
+        files.len(),
+        3,
+        "exactly one record per scanned file: {files:?}"
+    );
 
     let mut ready = 0;
     let mut skipped = 0;
@@ -578,7 +610,11 @@ fn import_file_record_lifecycle_one_row_per_file() {
     assert_eq!(resumed.success, 2, "{resumed:?}");
     assert_eq!(resumed.unsupported, 1, "{resumed:?}");
     assert_eq!(resumed.failed, 0, "{resumed:?}");
-    assert_eq!(repo.count_ready_assets().unwrap(), before, "no double import");
+    assert_eq!(
+        repo.count_ready_assets().unwrap(),
+        before,
+        "no double import"
+    );
     assert_eq!(repo.list_import_files(&job_id).unwrap().len(), 3);
 
     let job = repo.get_import_job(&job_id).unwrap().unwrap();
@@ -608,7 +644,7 @@ fn resume_does_not_reimport_already_ready_files() {
 
     // Fully import the first file via the normal path.
     let ok = pipeline
-        .import_paths(&[done.clone()], DuplicateAction::Skip)
+        .import_paths(std::slice::from_ref(&done), DuplicateAction::Skip)
         .unwrap();
     assert_eq!(ok.success, 1);
     let done_asset = ok.files[0].asset_id.clone().unwrap();
@@ -688,6 +724,53 @@ fn resume_does_not_reimport_already_ready_files() {
     assert_eq!(job.status, ImportJobStatus::Completed);
     assert_eq!(job.success_count, 2);
     assert_eq!(job.processed_files, 2);
+}
+
+#[test]
+fn unicode_filenames_import_search_and_reopen() {
+    use soundhub_core::search::{search, SearchQuery};
+
+    let tmp = tempfile::tempdir().unwrap();
+    let src_dir = tmp.path().join("录音 素材");
+    std::fs::create_dir_all(&src_dir).unwrap();
+    // CJK, Japanese, spaces, hyphens, long name.
+    let names = [
+        "采访 01.wav",
+        "山田太郎 01.wav",
+        "Scene 12 - Exterior.wav",
+        "über-mäßige Aufnahme (2024).wav",
+    ];
+    for n in &names {
+        write_min_wav(&src_dir.join(n), 48000, 1, 16, 50);
+    }
+
+    let lib_dir = tmp.path().join("Library 目录");
+    let (library, conn) = setup_library(&lib_dir);
+    let pipeline = ImportPipeline::new(&library, &conn);
+    let result = pipeline
+        .import_paths(&[src_dir], DuplicateAction::Skip)
+        .unwrap();
+    assert_eq!(result.success, 4, "{result:?}");
+
+    let repo = Repo::new(&conn);
+    let assets = repo.list_assets(10, 0).unwrap();
+    assert_eq!(assets.len(), 4);
+    for n in &names {
+        assert!(
+            assets.iter().any(|a| &a.filename == n),
+            "filename preserved: {n}"
+        );
+    }
+
+    // Search by a CJK token from filename.
+    let hits = search(&conn, &SearchQuery::text("采访")).unwrap();
+    assert_eq!(hits.len(), 1);
+
+    // Library copy exists at the resolved path (Unicode source path is fine).
+    for a in &assets {
+        let abs = library.asset_abspath(&a.library_relpath);
+        assert!(abs.exists(), "missing library copy for {}", abs.display());
+    }
 }
 
 #[test]

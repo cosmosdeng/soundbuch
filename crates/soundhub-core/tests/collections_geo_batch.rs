@@ -68,7 +68,12 @@ fn smart_collection_matches_by_tag_and_sample_rate() {
     let repo = Repo::new(&conn);
     let assets = repo.list_assets(10, 0).unwrap();
     assert_eq!(assets.len(), 2);
-    let hi = assets.iter().find(|a| a.sample_rate == Some(96000)).unwrap().id.clone();
+    let hi = assets
+        .iter()
+        .find(|a| a.sample_rate == Some(96000))
+        .unwrap()
+        .id
+        .clone();
     let tag = repo.upsert_tag("field").unwrap();
     repo.add_asset_tag(&hi, &tag.id).unwrap();
 
@@ -192,8 +197,18 @@ fn gps_listing_and_bbox_filter() {
 
     let repo = Repo::new(&conn);
     let assets = repo.list_assets(10, 0).unwrap();
-    let jeju = assets.iter().find(|a| a.filename == "jeju.wav").unwrap().id.clone();
-    let paris = assets.iter().find(|a| a.filename == "paris.wav").unwrap().id.clone();
+    let jeju = assets
+        .iter()
+        .find(|a| a.filename == "jeju.wav")
+        .unwrap()
+        .id
+        .clone();
+    let paris = assets
+        .iter()
+        .find(|a| a.filename == "paris.wav")
+        .unwrap()
+        .id
+        .clone();
 
     // Stamp GPS onto two assets (import path may not have GPS in min WAV).
     for (id, lat, lon) in [(&jeju, 33.4996, 126.5312), (&paris, 48.8566, 2.3522)] {
@@ -290,7 +305,9 @@ fn batch_add_and_remove_tag_person_collection() {
             value: serde_json::json!("reviewed"),
         }],
     };
-    let smart = repo.create_smart_collection("Still reviewed", &rules).unwrap();
+    let smart = repo
+        .create_smart_collection("Still reviewed", &rules)
+        .unwrap();
     let hits = repo.list_collection_assets(&smart.id).unwrap();
     assert_eq!(hits, vec![ids[2].clone()]);
 

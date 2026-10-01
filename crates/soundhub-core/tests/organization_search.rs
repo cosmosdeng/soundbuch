@@ -161,7 +161,10 @@ fn search_filter_by_tag_and_sample_rate() {
     assert_eq!(assets.len(), 2);
 
     // Tag only one of them.
-    let a = assets.iter().find(|a| a.sample_rate == Some(48000)).unwrap();
+    let a = assets
+        .iter()
+        .find(|a| a.sample_rate == Some(48000))
+        .unwrap();
     let tag = repo.upsert_tag("wind").unwrap();
     repo.add_asset_tag(&a.id, &tag.id).unwrap();
 
@@ -269,10 +272,7 @@ fn text_search_ands_with_tag_filter() {
     let repo = Repo::new(&conn);
     let assets = repo.list_assets(10, 0).unwrap();
     assert_eq!(assets.len(), 2);
-    let tagged = assets
-        .iter()
-        .find(|a| a.filename.contains("wave"))
-        .unwrap();
+    let tagged = assets.iter().find(|a| a.filename.contains("wave")).unwrap();
     let tag = repo.upsert_tag("calm").unwrap();
     repo.add_asset_tag(&tagged.id, &tag.id).unwrap();
 
@@ -322,7 +322,8 @@ fn remove_tag_person_and_collection_unlink_only() {
 
     repo.remove_asset_tag(&asset_id, &tag.id).unwrap();
     repo.remove_asset_person(&asset_id, &person.id).unwrap();
-    repo.remove_asset_from_collection(&asset_id, &col.id).unwrap();
+    repo.remove_asset_from_collection(&asset_id, &col.id)
+        .unwrap();
 
     // Asset file and row remain — only links were dropped.
     let asset = repo.get_asset(&asset_id).unwrap().unwrap();
@@ -331,8 +332,16 @@ fn remove_tag_person_and_collection_unlink_only() {
 
     // Tags/people/collections themselves are not deleted.
     assert!(repo.list_tags().unwrap().iter().any(|t| t.name == "rain"));
-    assert!(repo.list_people().unwrap().iter().any(|p| p.name == "Wang Wu"));
-    assert!(repo.list_collections().unwrap().iter().any(|c| c.name == "Field"));
+    assert!(repo
+        .list_people()
+        .unwrap()
+        .iter()
+        .any(|p| p.name == "Wang Wu"));
+    assert!(repo
+        .list_collections()
+        .unwrap()
+        .iter()
+        .any(|c| c.name == "Field"));
 }
 
 #[test]
@@ -393,7 +402,8 @@ fn relation_changes_rewrite_fts_without_manual_reindex() {
     // Unlink — names must drop out of the index.
     repo.remove_asset_tag(&asset_id, &tag.id).unwrap();
     repo.remove_asset_person(&asset_id, &person.id).unwrap();
-    repo.remove_asset_from_collection(&asset_id, &col.id).unwrap();
+    repo.remove_asset_from_collection(&asset_id, &col.id)
+        .unwrap();
 
     assert!(!search(&conn, &SearchQuery::text("seagull"))
         .unwrap()
@@ -578,7 +588,11 @@ fn delete_asset_removes_fts_row() {
         .unwrap()
     };
     // search() filters status='ready', so assert on the FTS table directly.
-    assert_eq!(fts_count(&conn), 1, "precondition: incomplete asset is indexed");
+    assert_eq!(
+        fts_count(&conn),
+        1,
+        "precondition: incomplete asset is indexed"
+    );
 
     repo.delete_asset(&id).unwrap();
 
@@ -610,13 +624,17 @@ fn import_indexes_filename_path_and_metadata() {
         .unwrap()
         .contains(&asset_id));
     // Original path token (source dir name lands in original_path).
-    assert!(search(&conn, &SearchQuery::text("src"))
-        .unwrap()
-        .contains(&asset_id),
-        "original_path should be searchable");
+    assert!(
+        search(&conn, &SearchQuery::text("src"))
+            .unwrap()
+            .contains(&asset_id),
+        "original_path should be searchable"
+    );
     // Technical metadata token (sample rate written into metadata_values).
-    assert!(search(&conn, &SearchQuery::text("48000"))
-        .unwrap()
-        .contains(&asset_id),
-        "metadata_text should carry sample_rate");
+    assert!(
+        search(&conn, &SearchQuery::text("48000"))
+            .unwrap()
+            .contains(&asset_id),
+        "metadata_text should carry sample_rate"
+    );
 }

@@ -75,8 +75,12 @@ impl Library {
     }
 
     /// Physical path for an asset: `assets/<id[3..5]>/<id>.<ext>`.
-    /// Asset id, not filename, is the on-disk identity — avoids collisions
-    /// from devices that all emit `0001.wav`.
+    ///
+    /// The returned string is a **portable relative path** always joined with
+    /// `/` (stored in SQLite). `asset_abspath` uses `Path::join`, which accepts
+    /// `/` on every target OS, so the same Library row works on
+    /// Windows / macOS / Linux. Asset id, not filename, is the on-disk
+    /// identity — avoids collisions from devices that all emit `0001.wav`.
     pub fn asset_relpath(&self, id: &AssetId, extension: Option<&str>) -> String {
         let id_str = id.as_str();
         // `sh_` is 3 chars; next 2 chars form the shard folder.
@@ -93,6 +97,7 @@ impl Library {
         format!("{ASSETS_DIR}/{shard}/{name}")
     }
 
+    /// Resolve a stored portable relpath against the Library root.
     pub fn asset_abspath(&self, relpath: &str) -> PathBuf {
         self.root.join(relpath)
     }

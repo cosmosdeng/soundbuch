@@ -102,10 +102,8 @@ pub fn inspect(path: &str) -> LibraryInspection {
     } else if has_db {
         db_size_bytes = std::fs::metadata(&db).ok().map(|m| m.len());
         // Cheap count via SQLite open; ignore failures (e.g. locked).
-        match rusqlite::Connection::open_with_flags(
-            &db,
-            rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
-        ) {
+        match rusqlite::Connection::open_with_flags(&db, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
+        {
             Ok(conn) => {
                 asset_count = conn
                     .query_row(
@@ -186,11 +184,12 @@ pub fn compose_library_path(parent: &str, name: &str) -> String {
 
 /// What `Library::create` will place on disk — shown before confirming.
 pub fn creation_preview(path: &str) -> Vec<String> {
+    let root = Path::new(path);
     vec![
-        format!("{path}/library.db"),
-        format!("{path}/assets/"),
-        format!("{path}/metadata/"),
-        format!("{path}/cache/"),
+        root.join("library.db").display().to_string(),
+        root.join("assets").display().to_string(),
+        root.join("metadata").display().to_string(),
+        root.join("cache").display().to_string(),
     ]
 }
 
@@ -206,7 +205,10 @@ mod tests {
 
     #[test]
     fn compose_empty_name_uses_parent() {
-        assert_eq!(compose_library_path("/Volumes/AudioSSD", ""), "/Volumes/AudioSSD");
+        assert_eq!(
+            compose_library_path("/Volumes/AudioSSD", ""),
+            "/Volumes/AudioSSD"
+        );
     }
 
     #[test]

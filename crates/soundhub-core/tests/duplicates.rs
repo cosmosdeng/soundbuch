@@ -40,7 +40,12 @@ fn write_min_wav(path: &Path, sample_rate: u32, channels: u16, bits: u16, frames
 
 /// Import the same bytes twice via ImportAsDuplicate so the library
 /// legitimately holds two assets with one SHA-256.
-fn import_pair_with_same_content() -> (tempfile::TempDir, Library, rusqlite::Connection, Vec<AssetId>) {
+fn import_pair_with_same_content() -> (
+    tempfile::TempDir,
+    Library,
+    rusqlite::Connection,
+    Vec<AssetId>,
+) {
     let tmp = tempfile::tempdir().unwrap();
     let src = tmp.path().join("src");
     std::fs::create_dir_all(&src).unwrap();
@@ -56,7 +61,10 @@ fn import_pair_with_same_content() -> (tempfile::TempDir, Library, rusqlite::Con
 
     // First pass: import everything, keep duplicates.
     let r = pipeline
-        .import_paths(&[src.clone()], DuplicateAction::ImportAsDuplicate)
+        .import_paths(
+            std::slice::from_ref(&src),
+            DuplicateAction::ImportAsDuplicate,
+        )
         .unwrap();
     assert_eq!(r.success, 3, "{r:?}");
 
@@ -92,8 +100,18 @@ fn dedupe_keep_oldest_trashes_later_copies() {
     assert_eq!(trashed, 1);
 
     let repo = Repo::new(&conn);
-    assert!(repo.get_asset(&oldest).unwrap().unwrap().deleted_at.is_none());
-    assert!(repo.get_asset(&newest).unwrap().unwrap().deleted_at.is_some());
+    assert!(repo
+        .get_asset(&oldest)
+        .unwrap()
+        .unwrap()
+        .deleted_at
+        .is_none());
+    assert!(repo
+        .get_asset(&newest)
+        .unwrap()
+        .unwrap()
+        .deleted_at
+        .is_some());
     assert!(duplicates::find_groups(&conn).unwrap().is_empty());
     // Unique asset untouched.
     assert_eq!(repo.count_ready_assets().unwrap(), 2);
@@ -108,8 +126,18 @@ fn dedupe_keep_newest_picks_the_other_copy() {
 
     duplicates::dedupe(&conn, KeepStrategy::Newest).unwrap();
     let repo = Repo::new(&conn);
-    assert!(repo.get_asset(&newest).unwrap().unwrap().deleted_at.is_none());
-    assert!(repo.get_asset(&oldest).unwrap().unwrap().deleted_at.is_some());
+    assert!(repo
+        .get_asset(&newest)
+        .unwrap()
+        .unwrap()
+        .deleted_at
+        .is_none());
+    assert!(repo
+        .get_asset(&oldest)
+        .unwrap()
+        .unwrap()
+        .deleted_at
+        .is_some());
 }
 
 #[test]

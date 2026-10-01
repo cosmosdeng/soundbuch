@@ -66,7 +66,7 @@ fn soft_delete_hides_from_search_and_list_restores() {
         .unwrap()
         .contains(&id));
 
-    let n = repo.soft_delete_assets(&[id.clone()]).unwrap();
+    let n = repo.soft_delete_assets(std::slice::from_ref(&id)).unwrap();
     assert_eq!(n, 1);
 
     assert_eq!(repo.count_ready_assets().unwrap(), 0);
@@ -77,9 +77,12 @@ fn soft_delete_hides_from_search_and_list_restores() {
     assert!(repo.list_deleted_assets(10, 0).unwrap().len() == 1);
 
     // Soft-delete is idempotent.
-    assert_eq!(repo.soft_delete_assets(&[id.clone()]).unwrap(), 0);
+    assert_eq!(
+        repo.soft_delete_assets(std::slice::from_ref(&id)).unwrap(),
+        0
+    );
 
-    assert_eq!(repo.restore_assets(&[id.clone()]).unwrap(), 1);
+    assert_eq!(repo.restore_assets(std::slice::from_ref(&id)).unwrap(), 1);
     assert_eq!(repo.count_ready_assets().unwrap(), 1);
     assert_eq!(repo.count_deleted_assets().unwrap(), 0);
     assert!(search(&conn, &SearchQuery::text("clip"))
@@ -93,14 +96,21 @@ fn purge_removes_file_and_row_but_not_when_live() {
     let repo = Repo::new(&conn);
     let asset = repo.get_asset(&id).unwrap().unwrap();
     let abs = library.asset_abspath(&asset.library_relpath);
-    assert!(abs.exists(), "library copy should exist at {}", abs.display());
+    assert!(
+        abs.exists(),
+        "library copy should exist at {}",
+        abs.display()
+    );
 
     // Live assets cannot be purged.
     repo.purge_asset(&id, &abs).unwrap();
-    assert!(repo.get_asset(&id).unwrap().is_some(), "live asset survives purge");
+    assert!(
+        repo.get_asset(&id).unwrap().is_some(),
+        "live asset survives purge"
+    );
     assert!(abs.exists(), "live library copy survives purge");
 
-    repo.soft_delete_assets(&[id.clone()]).unwrap();
+    repo.soft_delete_assets(std::slice::from_ref(&id)).unwrap();
     repo.purge_asset(&id, &abs).unwrap();
     assert!(repo.get_asset(&id).unwrap().is_none());
     assert!(!abs.exists(), "library copy removed");
@@ -145,7 +155,7 @@ fn undo_remove_tag_relinks() {
 #[test]
 fn undo_soft_delete_restores() {
     let (_tmp, _library, conn, id) = setup_with_one();
-    undo::soft_delete(&conn, &[id.clone()]).unwrap();
+    undo::soft_delete(&conn, std::slice::from_ref(&id)).unwrap();
     assert_eq!(Repo::new(&conn).count_deleted_assets().unwrap(), 1);
 
     undo::undo_last(&conn).unwrap().unwrap();
@@ -167,7 +177,9 @@ fn undo_batch_tag_is_single_step() {
     let library = Library::create(&lib_dir).unwrap();
     let conn = library.open_db().unwrap();
     let pipeline = ImportPipeline::new(&library, &conn);
-    pipeline.import_paths(&[src], DuplicateAction::Skip).unwrap();
+    pipeline
+        .import_paths(&[src], DuplicateAction::Skip)
+        .unwrap();
     let repo = Repo::new(&conn);
     let assets = repo.list_assets(10, 0).unwrap();
     let ids: Vec<AssetId> = assets.iter().map(|a| a.id.clone()).collect();
@@ -193,13 +205,13 @@ fn undo_batch_tag_is_single_step() {
     )
     .unwrap();
 
-    assert!(search(&conn, &SearchQuery::text("reviewed"))
-        .unwrap()
-        .len() >= 2);
+    assert!(search(&conn, &SearchQuery::text("reviewed")).unwrap().len() >= 2);
 
     undo::undo_last(&conn).unwrap().unwrap();
     assert!(
-        search(&conn, &SearchQuery::text("reviewed")).unwrap().is_empty(),
+        search(&conn, &SearchQuery::text("reviewed"))
+            .unwrap()
+            .is_empty(),
         "one undo clears both tags"
     );
 }

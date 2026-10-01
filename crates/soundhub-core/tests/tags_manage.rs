@@ -39,7 +39,12 @@ fn write_min_wav(path: &Path, sample_rate: u32, channels: u16, bits: u16, frames
 }
 
 /// Library with 3 assets: a.wav (tags: alpha, shared), b.wav (beta, shared), c.wav (gamma).
-fn setup_three() -> (tempfile::TempDir, Library, rusqlite::Connection, Vec<AssetId>) {
+fn setup_three() -> (
+    tempfile::TempDir,
+    Library,
+    rusqlite::Connection,
+    Vec<AssetId>,
+) {
     let tmp = tempfile::tempdir().unwrap();
     let src = tmp.path().join("src");
     std::fs::create_dir_all(&src).unwrap();
@@ -51,7 +56,9 @@ fn setup_three() -> (tempfile::TempDir, Library, rusqlite::Connection, Vec<Asset
     let library = Library::create(&lib_dir).unwrap();
     let conn = library.open_db().unwrap();
     let pipeline = ImportPipeline::new(&library, &conn);
-    pipeline.import_paths(&[src], DuplicateAction::Skip).unwrap();
+    pipeline
+        .import_paths(&[src], DuplicateAction::Skip)
+        .unwrap();
 
     let repo = Repo::new(&conn);
     let mut assets = repo.list_assets(10, 0).unwrap();
@@ -82,11 +89,19 @@ fn list_tags_with_usage_counts_live_assets() {
     undo::soft_delete(&conn, &[ids[0].clone()]).unwrap();
     let usage2 = repo.list_tags_with_usage().unwrap();
     assert_eq!(
-        usage2.iter().find(|u| u.name == "alpha").unwrap().asset_count,
+        usage2
+            .iter()
+            .find(|u| u.name == "alpha")
+            .unwrap()
+            .asset_count,
         0
     );
     assert_eq!(
-        usage2.iter().find(|u| u.name == "shared").unwrap().asset_count,
+        usage2
+            .iter()
+            .find(|u| u.name == "shared")
+            .unwrap()
+            .asset_count,
         1
     );
 }
@@ -95,25 +110,45 @@ fn list_tags_with_usage_counts_live_assets() {
 fn rename_tag_updates_fts_and_is_undoable() {
     let (_tmp, _lib, conn, ids) = setup_three();
     let repo = Repo::new(&conn);
-    let alpha = repo.list_tags().unwrap().into_iter().find(|t| t.name == "alpha").unwrap();
+    let alpha = repo
+        .list_tags()
+        .unwrap()
+        .into_iter()
+        .find(|t| t.name == "alpha")
+        .unwrap();
 
     // Old name searchable, new name not.
-    assert!(search(&conn, &SearchQuery::text("alpha")).unwrap().contains(&ids[0]));
-    assert!(!search(&conn, &SearchQuery::text("zeta")).unwrap().contains(&ids[0]));
+    assert!(search(&conn, &SearchQuery::text("alpha"))
+        .unwrap()
+        .contains(&ids[0]));
+    assert!(!search(&conn, &SearchQuery::text("zeta"))
+        .unwrap()
+        .contains(&ids[0]));
 
     undo::rename_tag(&conn, &alpha.id, "zeta").unwrap();
-    assert!(!search(&conn, &SearchQuery::text("alpha")).unwrap().contains(&ids[0]));
-    assert!(search(&conn, &SearchQuery::text("zeta")).unwrap().contains(&ids[0]));
+    assert!(!search(&conn, &SearchQuery::text("alpha"))
+        .unwrap()
+        .contains(&ids[0]));
+    assert!(search(&conn, &SearchQuery::text("zeta"))
+        .unwrap()
+        .contains(&ids[0]));
 
     undo::undo_last(&conn).unwrap().unwrap();
-    assert!(search(&conn, &SearchQuery::text("alpha")).unwrap().contains(&ids[0]));
+    assert!(search(&conn, &SearchQuery::text("alpha"))
+        .unwrap()
+        .contains(&ids[0]));
 }
 
 #[test]
 fn rename_tag_rejects_collision() {
     let (_tmp, _lib, conn, _ids) = setup_three();
     let repo = Repo::new(&conn);
-    let alpha = repo.list_tags().unwrap().into_iter().find(|t| t.name == "alpha").unwrap();
+    let alpha = repo
+        .list_tags()
+        .unwrap()
+        .into_iter()
+        .find(|t| t.name == "alpha")
+        .unwrap();
     assert!(undo::rename_tag(&conn, &alpha.id, "beta").is_err());
 }
 
@@ -121,34 +156,63 @@ fn rename_tag_rejects_collision() {
 fn delete_tag_unlinks_everywhere_and_is_undoable() {
     let (_tmp, _lib, conn, ids) = setup_three();
     let repo = Repo::new(&conn);
-    let shared = repo.list_tags().unwrap().into_iter().find(|t| t.name == "shared").unwrap();
+    let shared = repo
+        .list_tags()
+        .unwrap()
+        .into_iter()
+        .find(|t| t.name == "shared")
+        .unwrap();
 
     undo::delete_tag(&conn, &shared.id).unwrap();
-    assert!(!search(&conn, &SearchQuery::text("shared")).unwrap().contains(&ids[0]));
-    assert!(!search(&conn, &SearchQuery::text("shared")).unwrap().contains(&ids[1]));
+    assert!(!search(&conn, &SearchQuery::text("shared"))
+        .unwrap()
+        .contains(&ids[0]));
+    assert!(!search(&conn, &SearchQuery::text("shared"))
+        .unwrap()
+        .contains(&ids[1]));
     assert!(repo.list_tags().unwrap().iter().all(|t| t.name != "shared"));
 
     undo::undo_last(&conn).unwrap().unwrap();
-    assert!(search(&conn, &SearchQuery::text("shared")).unwrap().contains(&ids[0]));
-    assert!(search(&conn, &SearchQuery::text("shared")).unwrap().contains(&ids[1]));
+    assert!(search(&conn, &SearchQuery::text("shared"))
+        .unwrap()
+        .contains(&ids[0]));
+    assert!(search(&conn, &SearchQuery::text("shared"))
+        .unwrap()
+        .contains(&ids[1]));
 }
 
 #[test]
 fn merge_tags_moves_links_and_is_undoable() {
     let (_tmp, _lib, conn, ids) = setup_three();
     let repo = Repo::new(&conn);
-    let alpha = repo.list_tags().unwrap().into_iter().find(|t| t.name == "alpha").unwrap();
-    let shared = repo.list_tags().unwrap().into_iter().find(|t| t.name == "shared").unwrap();
+    let alpha = repo
+        .list_tags()
+        .unwrap()
+        .into_iter()
+        .find(|t| t.name == "alpha")
+        .unwrap();
+    let shared = repo
+        .list_tags()
+        .unwrap()
+        .into_iter()
+        .find(|t| t.name == "shared")
+        .unwrap();
 
     // a.wav has alpha+shared; merge alpha→shared should leave a.wav with just shared.
     undo::merge_tags(&conn, &alpha.id, &shared.id).unwrap();
     assert!(repo.list_tags().unwrap().iter().all(|t| t.name != "alpha"));
-    assert!(search(&conn, &SearchQuery::text("shared")).unwrap().contains(&ids[0]));
-    assert!(!search(&conn, &SearchQuery::text("alpha")).unwrap().contains(&ids[0]));
+    assert!(search(&conn, &SearchQuery::text("shared"))
+        .unwrap()
+        .contains(&ids[0]));
+    assert!(!search(&conn, &SearchQuery::text("alpha"))
+        .unwrap()
+        .contains(&ids[0]));
 
     undo::undo_last(&conn).unwrap().unwrap();
     assert!(repo.list_tags().unwrap().iter().any(|t| t.name == "alpha"));
-    assert!(search(&conn, &SearchQuery::text("alpha")).unwrap().contains(&ids[0]));
+    assert!(search(&conn, &SearchQuery::text("alpha"))
+        .unwrap()
+        .contains(&ids[0]));
 }
 
 #[test]

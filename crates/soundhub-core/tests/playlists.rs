@@ -37,7 +37,12 @@ fn write_min_wav(path: &Path, sample_rate: u32, channels: u16, bits: u16, frames
 }
 
 /// 3 assets, ids sorted by filename: a, b, c.
-fn setup_three() -> (tempfile::TempDir, Library, rusqlite::Connection, Vec<AssetId>) {
+fn setup_three() -> (
+    tempfile::TempDir,
+    Library,
+    rusqlite::Connection,
+    Vec<AssetId>,
+) {
     let tmp = tempfile::tempdir().unwrap();
     let src = tmp.path().join("src");
     std::fs::create_dir_all(&src).unwrap();
@@ -49,7 +54,9 @@ fn setup_three() -> (tempfile::TempDir, Library, rusqlite::Connection, Vec<Asset
     let library = Library::create(&lib_dir).unwrap();
     let conn = library.open_db().unwrap();
     let pipeline = ImportPipeline::new(&library, &conn);
-    pipeline.import_paths(&[src], DuplicateAction::Skip).unwrap();
+    pipeline
+        .import_paths(&[src], DuplicateAction::Skip)
+        .unwrap();
 
     let repo = Repo::new(&conn);
     let mut assets = repo.list_assets(10, 0).unwrap();

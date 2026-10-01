@@ -45,7 +45,7 @@ pub fn parse_wav(path: &Path) -> Result<WavParse> {
 
     loop {
         let mut hdr = [0u8; 8];
-        if let Err(_) = r.read_exact(&mut hdr) {
+        if r.read_exact(&mut hdr).is_err() {
             break;
         }
         let id = String::from_utf8_lossy(&hdr[0..4]).to_string();
@@ -151,7 +151,8 @@ pub fn parse_wav(path: &Path) -> Result<WavParse> {
             if let Some(ch) = audio.channels {
                 let frame_size = (ch as u32) * (audio.bit_depth.unwrap_or(16) as u32 / 8).max(1);
                 if frame_size > 0 {
-                    audio.duration_ms = Some(data_size as u64 * 1000 / (frame_size as u64 * sr as u64 / 1).max(1));
+                    audio.duration_ms =
+                        Some(data_size as u64 * 1000 / (frame_size as u64 * sr as u64).max(1));
                     // More precisely: duration = samples / sample_rate
                     let samples = data_size as u64 / frame_size as u64;
                     audio.duration_ms = Some(samples * 1000 / sr as u64);
@@ -177,7 +178,11 @@ fn apply_bext(data: &[u8], audio: &mut AudioMeta, raw: &mut BTreeMap<String, ser
     let get = |start: usize, end: usize| -> String {
         if data.len() >= end {
             let s = &data[start..end];
-            let s = s.iter().take_while(|b| **b != 0).copied().collect::<Vec<u8>>();
+            let s = s
+                .iter()
+                .take_while(|b| **b != 0)
+                .copied()
+                .collect::<Vec<u8>>();
             String::from_utf8_lossy(&s).trim().to_string()
         } else {
             String::new()
@@ -201,7 +206,11 @@ fn apply_bext(data: &[u8], audio: &mut AudioMeta, raw: &mut BTreeMap<String, ser
     }
     let coding_history = if data.len() > 602 {
         let s = &data[602..];
-        let s = s.iter().take_while(|b| **b != 0).copied().collect::<Vec<u8>>();
+        let s = s
+            .iter()
+            .take_while(|b| **b != 0)
+            .copied()
+            .collect::<Vec<u8>>();
         String::from_utf8_lossy(&s).trim().to_string()
     } else {
         String::new()
@@ -220,10 +229,16 @@ fn apply_bext(data: &[u8], audio: &mut AudioMeta, raw: &mut BTreeMap<String, ser
         );
     }
     if !origination_date.is_empty() {
-        raw.insert("bwf_origination_date".into(), serde_json::json!(origination_date));
+        raw.insert(
+            "bwf_origination_date".into(),
+            serde_json::json!(origination_date),
+        );
     }
     if !origination_time.is_empty() {
-        raw.insert("bwf_origination_time".into(), serde_json::json!(origination_time));
+        raw.insert(
+            "bwf_origination_time".into(),
+            serde_json::json!(origination_time),
+        );
     }
     if let Some(tr) = time_reference {
         raw.insert("bwf_time_reference".into(), serde_json::json!(tr));
@@ -232,7 +247,10 @@ fn apply_bext(data: &[u8], audio: &mut AudioMeta, raw: &mut BTreeMap<String, ser
         raw.insert("bwf_umid".into(), serde_json::json!(umid));
     }
     if !coding_history.is_empty() {
-        raw.insert("bwf_coding_history".into(), serde_json::json!(coding_history));
+        raw.insert(
+            "bwf_coding_history".into(),
+            serde_json::json!(coding_history),
+        );
     }
     raw.insert("bwf_present".into(), serde_json::json!(true));
 }
@@ -240,7 +258,10 @@ fn apply_bext(data: &[u8], audio: &mut AudioMeta, raw: &mut BTreeMap<String, ser
 /// iXML chunk (XML). Extract BWF-like + GPS when present; keep full text in raw.
 fn apply_ixml(data: &[u8], raw: &mut BTreeMap<String, serde_json::Value>) -> Option<GpsMeta> {
     let text = String::from_utf8_lossy(data).to_string();
-    raw.insert("ixml_raw".into(), serde_json::json!(text.trim_end_matches('\0')));
+    raw.insert(
+        "ixml_raw".into(),
+        serde_json::json!(text.trim_end_matches('\0')),
+    );
 
     // Very small targeted extractions — no full XML dependency in MVP.
     let mut gps = GpsMeta {
@@ -416,7 +437,7 @@ mod tests {
         // 20 MiB "junk" chunk — over the 8 MiB metadata cap.
         buf.extend_from_slice(b"junk");
         buf.extend_from_slice(&((20u32) * 1024 * 1024).to_le_bytes());
-        buf.extend_from_slice(&vec![0u8; 128]);
+        buf.extend_from_slice(&[0u8; 128]);
         f.write_all(&buf).unwrap();
 
         let p = parse_wav(f.path()).unwrap();

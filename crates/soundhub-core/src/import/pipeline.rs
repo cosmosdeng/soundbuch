@@ -87,7 +87,10 @@ impl<'a> ImportPipeline<'a> {
         {
             let repo = Repo::new(self.conn);
             annotate_duplicates(&mut summary, &|hash| {
-                repo.find_by_hash(hash).ok().flatten().map(|id| id.to_string())
+                repo.find_by_hash(hash)
+                    .ok()
+                    .flatten()
+                    .map(|id| id.to_string())
             });
         }
 
@@ -334,9 +337,7 @@ impl<'a> ImportPipeline<'a> {
         };
 
         let asset_id = AssetId::new();
-        let relpath = self
-            .library
-            .asset_relpath(&asset_id, ext.as_deref());
+        let relpath = self.library.asset_relpath(&asset_id, ext.as_deref());
         let abs_dest = self.library.prepare_asset_dir(&relpath)?;
 
         // Extract metadata. Parse failures are recorded, never block import.
@@ -443,7 +444,13 @@ impl<'a> ImportPipeline<'a> {
     fn mark_import_file_failed(&self, file_record_id: &RowId, error: &str) -> Result<()> {
         let repo = Repo::new(self.conn);
         let tx = self.conn.unchecked_transaction()?;
-        repo.update_import_file(&tx, file_record_id, ImportFileStatus::Failed, None, Some(error))?;
+        repo.update_import_file(
+            &tx,
+            file_record_id,
+            ImportFileStatus::Failed,
+            None,
+            Some(error),
+        )?;
         tx.commit()?;
         Ok(())
     }
@@ -735,26 +742,25 @@ fn build_result_from_files(job: &ImportJob, files: &[ImportFileRecord]) -> Impor
     let mut duplicate = 0u32;
     let mut unsupported = 0u32;
     for f in files {
-        let (outcome, counted) = match f.status {
+        let outcome = match f.status {
             ImportFileStatus::Ready => {
                 success += 1;
-                (ImportOutcome::Imported, ())
+                ImportOutcome::Imported
             }
             ImportFileStatus::Failed => {
                 failed += 1;
-                (ImportOutcome::Failed, ())
+                ImportOutcome::Failed
             }
             ImportFileStatus::SkippedDuplicate => {
                 duplicate += 1;
-                (ImportOutcome::SkippedDuplicate, ())
+                ImportOutcome::SkippedDuplicate
             }
             ImportFileStatus::SkippedUnsupported => {
                 unsupported += 1;
-                (ImportOutcome::SkippedUnsupported, ())
+                ImportOutcome::SkippedUnsupported
             }
-            _ => (ImportOutcome::Cancelled, ()),
+            _ => ImportOutcome::Cancelled,
         };
-        let _ = counted;
         results.push(FileImportResult {
             source_path: f.source_path.clone(),
             outcome,

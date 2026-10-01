@@ -276,16 +276,23 @@ fn asset_to_summary(a: soundhub_core::Asset) -> AssetSummary {
 // ── Import ──────────────────────────────────────────────────────────────────
 
 #[tauri::command]
-async fn scan_paths(app: AppHandle, state: State<'_, AppState>, paths: Vec<String>) -> Result<ScanPreview, String> {
+async fn scan_paths(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    paths: Vec<String>,
+) -> Result<ScanPreview, String> {
     let _ = state; // presence check via run_blocking
     run_blocking(app, move |o, _app| {
         let pb: Vec<PathBuf> = paths.into_iter().map(PathBuf::from).collect();
-        let mut summary =
-            soundhub_core::import::scan_paths(&pb).map_err(|e| soundhub_core::Error::other(e.to_string()))?;
+        let mut summary = soundhub_core::import::scan_paths(&pb)
+            .map_err(|e| soundhub_core::Error::other(e.to_string()))?;
         {
             let repo = Repo::new(&o.conn);
             soundhub_core::import::annotate_duplicates(&mut summary, &|hash| {
-                repo.find_by_hash(hash).ok().flatten().map(|id| id.to_string())
+                repo.find_by_hash(hash)
+                    .ok()
+                    .flatten()
+                    .map(|id| id.to_string())
             });
         }
         Ok(ScanPreview {
@@ -324,9 +331,13 @@ async fn import_paths(
         emit_progress(app, "import", 0, total_estimate, "starting");
         let pipeline = ImportPipeline::new(&o.library, &o.conn);
         let app2 = app.clone();
-        let r = pipeline.import_paths_with_progress(&pb, action, &move |processed, total, current| {
-            emit_progress(&app2, "import", processed, total, current);
-        })?;
+        let r = pipeline.import_paths_with_progress(
+            &pb,
+            action,
+            &move |processed, total, current| {
+                emit_progress(&app2, "import", processed, total, current);
+            },
+        )?;
         emit_progress(app, "import", r.total, r.total, "done");
         Ok(ImportResultDto {
             job_id: r.job_id,
@@ -342,14 +353,20 @@ async fn import_paths(
 }
 
 #[tauri::command]
-async fn incomplete_jobs(app: AppHandle, state: State<'_, AppState>) -> Result<Vec<ImportJob>, String> {
+async fn incomplete_jobs(
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<Vec<ImportJob>, String> {
     let _ = state;
-    run_blocking(app, |o, _| Ok(Repo::new(&o.conn).list_incomplete_import_jobs()?)).await
+    run_blocking(app, |o, _| Repo::new(&o.conn).list_incomplete_import_jobs()).await
 }
 
 /// Full startup recovery picture: incomplete jobs + non-ready assets.
 #[tauri::command]
-async fn recovery_report(app: AppHandle, state: State<'_, AppState>) -> Result<RecoveryReportDto, String> {
+async fn recovery_report(
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<RecoveryReportDto, String> {
     let _ = state;
     run_blocking(app, |o, _| {
         let report = o.library.inspect_recovery(&o.conn)?;
@@ -370,15 +387,20 @@ pub struct RecoveryReportDto {
 }
 
 #[tauri::command]
-async fn resume_job(app: AppHandle, state: State<'_, AppState>, job_id: String) -> Result<ImportResultDto, String> {
+async fn resume_job(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    job_id: String,
+) -> Result<ImportResultDto, String> {
     let _ = state;
     run_blocking(app, move |o, app| {
         let jid = RowId::parse(&job_id)?;
         let pipeline = ImportPipeline::new(&o.library, &o.conn);
         let app2 = app.clone();
-        let r = pipeline.resume_incomplete_with_progress(&jid, &move |processed, total, current| {
-            emit_progress(&app2, "resume", processed, total, current);
-        })?;
+        let r =
+            pipeline.resume_incomplete_with_progress(&jid, &move |processed, total, current| {
+                emit_progress(&app2, "resume", processed, total, current);
+            })?;
         Ok(ImportResultDto {
             job_id: r.job_id,
             total: r.total,
@@ -393,7 +415,11 @@ async fn resume_job(app: AppHandle, state: State<'_, AppState>, job_id: String) 
 }
 
 #[tauri::command]
-async fn retry_job(app: AppHandle, state: State<'_, AppState>, job_id: String) -> Result<ImportResultDto, String> {
+async fn retry_job(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    job_id: String,
+) -> Result<ImportResultDto, String> {
     let _ = state;
     run_blocking(app, move |o, app| {
         let jid = RowId::parse(&job_id)?;
@@ -417,12 +443,16 @@ async fn retry_job(app: AppHandle, state: State<'_, AppState>, job_id: String) -
 
 /// Drop partial work for an incomplete job. Ready assets are never touched.
 #[tauri::command]
-async fn cleanup_job(app: AppHandle, state: State<'_, AppState>, job_id: String) -> Result<u32, String> {
+async fn cleanup_job(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    job_id: String,
+) -> Result<u32, String> {
     let _ = state;
     run_blocking(app, move |o, _| {
         let jid = RowId::parse(&job_id)?;
         let pipeline = ImportPipeline::new(&o.library, &o.conn);
-        Ok(pipeline.cleanup_incomplete(&jid)?)
+        pipeline.cleanup_incomplete(&jid)
     })
     .await
 }
@@ -443,7 +473,10 @@ pub struct SearchInput {
 }
 
 #[tauri::command]
-fn search_assets(state: State<'_, AppState>, query: SearchInput) -> Result<Vec<AssetSummary>, String> {
+fn search_assets(
+    state: State<'_, AppState>,
+    query: SearchInput,
+) -> Result<Vec<AssetSummary>, String> {
     with_open(&state, |o| {
         let q = SearchQuery {
             text: query.text,
@@ -586,7 +619,11 @@ fn list_tags_with_usage(state: State<'_, AppState>) -> Result<Vec<TagUsageDto>, 
 }
 
 #[tauri::command]
-fn rename_tag(state: State<'_, AppState>, tag_id: String, new_name: String) -> Result<String, String> {
+fn rename_tag(
+    state: State<'_, AppState>,
+    tag_id: String,
+    new_name: String,
+) -> Result<String, String> {
     with_open(&state, |o| {
         let tid = RowId::parse(&tag_id)?;
         soundhub_core::undo::rename_tag(&o.conn, &tid, &new_name)
@@ -681,9 +718,7 @@ fn remove_person(
 #[tauri::command]
 fn soft_delete_assets(state: State<'_, AppState>, asset_ids: Vec<String>) -> Result<u32, String> {
     let ids = parse_asset_ids(&asset_ids)?;
-    with_open(&state, |o| {
-        soundhub_core::undo::soft_delete(&o.conn, &ids)
-    })
+    with_open(&state, |o| soundhub_core::undo::soft_delete(&o.conn, &ids))
 }
 
 #[tauri::command]
@@ -805,7 +840,11 @@ fn dedupe_library(
             "oldest" => KeepStrategy::Oldest,
             "newest" => KeepStrategy::Newest,
             "lowest-id" => KeepStrategy::LowestId,
-            other => return Err(soundhub_core::Error::other(format!("bad strategy: {other}"))),
+            other => {
+                return Err(soundhub_core::Error::other(format!(
+                    "bad strategy: {other}"
+                )))
+            }
         };
         match hash {
             Some(h) => soundhub_core::duplicates::dedupe_group(&o.conn, &h, strat),
@@ -1008,12 +1047,17 @@ fn pick_audio_files(title: Option<String>) -> Result<Vec<String>, String> {
     let picked = dlg
         .add_filter(
             "Audio",
-            &["wav", "bwf", "aif", "aiff", "flac", "mp3", "m4a", "aac", "caf"],
+            &[
+                "wav", "bwf", "aif", "aiff", "flac", "mp3", "m4a", "aac", "caf",
+            ],
         )
         .add_filter("All files", &["*"])
         .pick_files()
         .unwrap_or_default();
-    Ok(picked.into_iter().map(|p| p.display().to_string()).collect())
+    Ok(picked
+        .into_iter()
+        .map(|p| p.display().to_string())
+        .collect())
 }
 
 // ── Misc ────────────────────────────────────────────────────────────────────
@@ -1025,7 +1069,11 @@ async fn debug_ping(app: AppHandle) -> Result<String, String> {
         let state = app.state::<AppState>();
         let guard = state.inner.lock().map_err(|e| e.to_string())?;
         let open = guard.is_some();
-        Ok(if open { "pong:library-open".into() } else { "pong:no-library".into() })
+        Ok(if open {
+            "pong:library-open".into()
+        } else {
+            "pong:no-library".into()
+        })
     })
     .await
     .map_err(|e| format!("join: {e}"))?
@@ -1066,7 +1114,9 @@ fn ready_asset_path(
     }
     let abs = o.library.asset_abspath(&asset.library_relpath);
     if !abs.exists() {
-        return Err(soundhub_core::Error::other("asset file missing from library"));
+        return Err(soundhub_core::Error::other(
+            "asset file missing from library",
+        ));
     }
     Ok((aid, abs, asset.filename.clone()))
 }
@@ -1089,7 +1139,11 @@ const MAX_INLINE_AUDIO_BYTES: u64 = 64 * 1024 * 1024;
 /// Raw file bytes as an IPC response (blob-URL playback fallback).
 /// Only for small files / environments without the asset protocol.
 #[tauri::command]
-async fn asset_audio_bytes(app: AppHandle, state: State<'_, AppState>, id: String) -> Result<tauri::ipc::Response, String> {
+async fn asset_audio_bytes(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    id: String,
+) -> Result<tauri::ipc::Response, String> {
     let _ = state;
     tauri::async_runtime::spawn_blocking(move || {
         let state = app.state::<AppState>();
@@ -1168,11 +1222,7 @@ async fn asset_peaks(
 
 /// Cache peaks computed in the UI (Web Audio) for formats the core cannot decode.
 #[tauri::command]
-fn save_asset_peaks(
-    state: State<'_, AppState>,
-    id: String,
-    peaks: Vec<f32>,
-) -> Result<(), String> {
+fn save_asset_peaks(state: State<'_, AppState>, id: String, peaks: Vec<f32>) -> Result<(), String> {
     with_open(&state, |o| {
         let aid = AssetId::parse(&id)?;
         let cache = soundhub_core::audio::PeaksCache {
@@ -1186,7 +1236,9 @@ fn save_asset_peaks(
 
 // ── Smart Collections ──────────────────────────────────────────────────────
 
-fn parse_smart_rules(rules: Option<serde_json::Value>) -> Result<soundhub_core::SmartRules, String> {
+fn parse_smart_rules(
+    rules: Option<serde_json::Value>,
+) -> Result<soundhub_core::SmartRules, String> {
     let raw = rules.ok_or("rules are required")?;
     soundhub_core::collections::parse_rules(&raw)
         .ok_or_else(|| "invalid smart-collection rules JSON".to_string())
@@ -1292,13 +1344,13 @@ fn assets_in_bbox(
 // ── Batch editing ──────────────────────────────────────────────────────────
 
 fn parse_asset_ids(ids: &[String]) -> Result<Vec<AssetId>, String> {
-    ids.iter().map(|s| AssetId::parse(s).map_err(|e| e.to_string())).collect()
+    ids.iter()
+        .map(|s| AssetId::parse(s).map_err(|e| e.to_string()))
+        .collect()
 }
 
 fn parse_asset_ids_core(ids: &[String]) -> Result<Vec<AssetId>, soundhub_core::Error> {
-    ids.iter()
-        .map(|s| AssetId::parse(s))
-        .collect()
+    ids.iter().map(|s| AssetId::parse(s)).collect()
 }
 
 #[tauri::command]

@@ -20,11 +20,7 @@ impl<'a> Repo<'a> {
     // ── Assets ─────────────────────────────────────────────────────────────
 
     /// Insert a pending asset. The copy has NOT been verified yet.
-    pub fn insert_pending_asset(
-        &self,
-        tx: &Transaction<'_>,
-        asset: &Asset,
-    ) -> Result<()> {
+    pub fn insert_pending_asset(&self, tx: &Transaction<'_>, asset: &Asset) -> Result<()> {
         tx.execute(
             r#"
             INSERT INTO assets (
@@ -166,13 +162,11 @@ impl<'a> Repo<'a> {
     }
 
     pub fn count_ready_assets(&self) -> Result<u64> {
-        let n: i64 = self
-            .conn
-            .query_row(
-                "SELECT COUNT(*) FROM assets WHERE status = 'ready' AND deleted_at IS NULL",
-                [],
-                |r| r.get(0),
-            )?;
+        let n: i64 = self.conn.query_row(
+            "SELECT COUNT(*) FROM assets WHERE status = 'ready' AND deleted_at IS NULL",
+            [],
+            |r| r.get(0),
+        )?;
         Ok(n as u64)
     }
 
@@ -234,11 +228,7 @@ impl<'a> Repo<'a> {
         Ok(())
     }
 
-    pub fn update_import_job_progress(
-        &self,
-        tx: &Transaction<'_>,
-        job: &ImportJob,
-    ) -> Result<()> {
+    pub fn update_import_job_progress(&self, tx: &Transaction<'_>, job: &ImportJob) -> Result<()> {
         tx.execute(
             r#"
             UPDATE import_jobs SET
@@ -260,7 +250,9 @@ impl<'a> Repo<'a> {
     }
 
     pub fn get_import_job(&self, id: &RowId) -> Result<Option<ImportJob>> {
-        let mut stmt = self.conn.prepare("SELECT * FROM import_jobs WHERE id = ?1")?;
+        let mut stmt = self
+            .conn
+            .prepare("SELECT * FROM import_jobs WHERE id = ?1")?;
         let mut rows = stmt.query_map(params![id.as_str()], row_to_job)?;
         match rows.next() {
             Some(r) => Ok(Some(r?)),
@@ -310,8 +302,10 @@ impl<'a> Repo<'a> {
             });
         }
         let id = RowId::new();
-        self.conn
-            .execute("INSERT INTO tags (id, name) VALUES (?1, ?2)", params![id.as_str(), name])?;
+        self.conn.execute(
+            "INSERT INTO tags (id, name) VALUES (?1, ?2)",
+            params![id.as_str(), name],
+        )?;
         Ok(Tag {
             id,
             name: name.to_string(),
@@ -354,11 +348,7 @@ impl<'a> Repo<'a> {
         Ok(())
     }
 
-    pub fn create_collection(
-        &self,
-        name: &str,
-        parent_id: Option<&RowId>,
-    ) -> Result<Collection> {
+    pub fn create_collection(&self, name: &str, parent_id: Option<&RowId>) -> Result<Collection> {
         let id = RowId::new();
         self.conn.execute(
             "INSERT INTO collections (id, name, parent_id, collection_type, rules) VALUES (?1, ?2, ?3, 'static', NULL)",
@@ -497,18 +487,12 @@ impl<'a> Repo<'a> {
     }
 
     /// Replace the track order with `asset_ids` (must be the full membership).
-    pub fn playlist_reorder(
-        &self,
-        playlist_id: &RowId,
-        asset_ids: &[AssetId],
-    ) -> Result<()> {
+    pub fn playlist_reorder(&self, playlist_id: &RowId, asset_ids: &[AssetId]) -> Result<()> {
         let current: Vec<String> = {
-            let mut stmt = self.conn.prepare(
-                "SELECT asset_id FROM playlist_tracks WHERE playlist_id = ?1",
-            )?;
-            let rows = stmt.query_map(params![playlist_id.as_str()], |r| {
-                r.get::<_, String>(0)
-            })?;
+            let mut stmt = self
+                .conn
+                .prepare("SELECT asset_id FROM playlist_tracks WHERE playlist_id = ?1")?;
+            let rows = stmt.query_map(params![playlist_id.as_str()], |r| r.get::<_, String>(0))?;
             rows.collect::<std::result::Result<Vec<_>, _>>()?
         };
         let mut wanted: Vec<String> = asset_ids.iter().map(|a| a.to_string()).collect();
@@ -533,12 +517,7 @@ impl<'a> Repo<'a> {
     }
 
     /// Move a track from one index to another (shifts the rest).
-    pub fn playlist_move_track(
-        &self,
-        playlist_id: &RowId,
-        from: u32,
-        to: u32,
-    ) -> Result<()> {
+    pub fn playlist_move_track(&self, playlist_id: &RowId, from: u32, to: u32) -> Result<()> {
         let mut tracks = self.list_playlist_tracks(playlist_id)?;
         if from as usize >= tracks.len() || to as usize >= tracks.len() {
             return Err(Error::other("playlist_move_track: index out of range"));
@@ -583,9 +562,7 @@ impl<'a> Repo<'a> {
             let mut stmt = self.conn.prepare(
                 "SELECT asset_id FROM playlist_tracks WHERE playlist_id = ?1 ORDER BY position ASC",
             )?;
-            let rows = stmt.query_map(params![playlist_id.as_str()], |r| {
-                r.get::<_, String>(0)
-            })?;
+            let rows = stmt.query_map(params![playlist_id.as_str()], |r| r.get::<_, String>(0))?;
             rows.collect::<std::result::Result<Vec<_>, _>>()?
         };
         let tx = self.conn.unchecked_transaction()?;
@@ -601,11 +578,7 @@ impl<'a> Repo<'a> {
 
     /// Create a rule-driven collection. Membership is computed on read —
     /// nothing is written to `asset_collections`.
-    pub fn create_smart_collection(
-        &self,
-        name: &str,
-        rules: &SmartRules,
-    ) -> Result<Collection> {
+    pub fn create_smart_collection(&self, name: &str, rules: &SmartRules) -> Result<Collection> {
         let id = RowId::new();
         let rules_json = crate::collections::rules_to_value(rules);
         self.conn.execute(
@@ -623,11 +596,7 @@ impl<'a> Repo<'a> {
     }
 
     /// Replace the rules of a smart collection.
-    pub fn update_collection_rules(
-        &self,
-        collection_id: &RowId,
-        rules: &SmartRules,
-    ) -> Result<()> {
+    pub fn update_collection_rules(&self, collection_id: &RowId, rules: &SmartRules) -> Result<()> {
         let rules_json = crate::collections::rules_to_value(rules);
         let n = self.conn.execute(
             "UPDATE collections SET rules = ?1 WHERE id = ?2 AND collection_type = 'smart'",
@@ -660,8 +629,7 @@ impl<'a> Repo<'a> {
                 })?,
                 name: r.get(1)?,
                 parent_id: parent.and_then(|p| RowId::parse(&p).ok()),
-                collection_type: CollectionType::parse(&ctype)
-                    .unwrap_or(CollectionType::Static),
+                collection_type: CollectionType::parse(&ctype).unwrap_or(CollectionType::Static),
                 rules: rules.and_then(|s| serde_json::from_str(&s).ok()),
             })
         })?;
@@ -678,12 +646,11 @@ impl<'a> Repo<'a> {
             .ok_or_else(|| Error::other(format!("collection {collection_id} not found")))?;
         match col.collection_type {
             CollectionType::Static => {
-                let mut stmt = self.conn.prepare(
-                    "SELECT asset_id FROM asset_collections WHERE collection_id = ?1",
-                )?;
-                let rows = stmt.query_map(params![collection_id.as_str()], |r| {
-                    r.get::<_, String>(0)
-                })?;
+                let mut stmt = self
+                    .conn
+                    .prepare("SELECT asset_id FROM asset_collections WHERE collection_id = ?1")?;
+                let rows =
+                    stmt.query_map(params![collection_id.as_str()], |r| r.get::<_, String>(0))?;
                 let mut out = Vec::new();
                 for row in rows {
                     let s = row?;
@@ -859,11 +826,11 @@ impl<'a> Repo<'a> {
     }
 
     pub fn count_deleted_assets(&self) -> Result<u64> {
-        let n: i64 = self
-            .conn
-            .query_row("SELECT COUNT(*) FROM assets WHERE deleted_at IS NOT NULL", [], |r| {
-                r.get(0)
-            })?;
+        let n: i64 = self.conn.query_row(
+            "SELECT COUNT(*) FROM assets WHERE deleted_at IS NOT NULL",
+            [],
+            |r| r.get(0),
+        )?;
         Ok(n as u64)
     }
 
@@ -993,9 +960,11 @@ impl<'a> Repo<'a> {
     pub fn rename_tag(&self, tag_id: &RowId, new_name: &str) -> Result<String> {
         let old: String = self
             .conn
-            .query_row("SELECT name FROM tags WHERE id = ?1", params![tag_id.as_str()], |r| {
-                r.get(0)
-            })
+            .query_row(
+                "SELECT name FROM tags WHERE id = ?1",
+                params![tag_id.as_str()],
+                |r| r.get(0),
+            )
             .optional()?
             .ok_or_else(|| Error::other(format!("tag {tag_id} not found")))?;
 
@@ -1009,9 +978,7 @@ impl<'a> Repo<'a> {
             )
             .optional()?;
         if clash.is_some() {
-            return Err(Error::other(format!(
-                "tag “{new_name}” already exists"
-            )));
+            return Err(Error::other(format!("tag “{new_name}” already exists")));
         }
 
         let tx = self.conn.unchecked_transaction()?;
@@ -1021,9 +988,7 @@ impl<'a> Repo<'a> {
         )?;
         // Refresh FTS for every asset carrying this tag.
         let asset_ids: Vec<String> = {
-            let mut stmt = tx.prepare(
-                "SELECT asset_id FROM asset_tags WHERE tag_id = ?1",
-            )?;
+            let mut stmt = tx.prepare("SELECT asset_id FROM asset_tags WHERE tag_id = ?1")?;
             let rows = stmt.query_map(params![tag_id.as_str()], |r| r.get::<_, String>(0))?;
             rows.collect::<std::result::Result<Vec<_>, _>>()?
         };
@@ -1041,9 +1006,11 @@ impl<'a> Repo<'a> {
     pub fn delete_tag(&self, tag_id: &RowId) -> Result<(String, Vec<AssetId>)> {
         let name: String = self
             .conn
-            .query_row("SELECT name FROM tags WHERE id = ?1", params![tag_id.as_str()], |r| {
-                r.get(0)
-            })
+            .query_row(
+                "SELECT name FROM tags WHERE id = ?1",
+                params![tag_id.as_str()],
+                |r| r.get(0),
+            )
             .optional()?
             .ok_or_else(|| Error::other(format!("tag {tag_id} not found")))?;
 
@@ -1087,16 +1054,20 @@ impl<'a> Repo<'a> {
         }
         let from_name: String = self
             .conn
-            .query_row("SELECT name FROM tags WHERE id = ?1", params![from_id.as_str()], |r| {
-                r.get(0)
-            })
+            .query_row(
+                "SELECT name FROM tags WHERE id = ?1",
+                params![from_id.as_str()],
+                |r| r.get(0),
+            )
             .optional()?
             .ok_or_else(|| Error::other(format!("tag {from_id} not found")))?;
         let _: String = self
             .conn
-            .query_row("SELECT name FROM tags WHERE id = ?1", params![to_id.as_str()], |r| {
-                r.get(0)
-            })
+            .query_row(
+                "SELECT name FROM tags WHERE id = ?1",
+                params![to_id.as_str()],
+                |r| r.get(0),
+            )
             .optional()?
             .ok_or_else(|| Error::other(format!("tag {to_id} not found")))?;
 
@@ -1152,8 +1123,7 @@ impl<'a> Repo<'a> {
                     )
                 })?,
                 name: r.get(1)?,
-                parent_id: parent
-                    .and_then(|p| RowId::parse(&p).ok()),
+                parent_id: parent.and_then(|p| RowId::parse(&p).ok()),
                 collection_type: CollectionType::parse(&ctype).unwrap_or(CollectionType::Static),
                 rules: rules.and_then(|s| serde_json::from_str(&s).ok()),
             })
@@ -1314,10 +1284,7 @@ impl<'a> Repo<'a> {
                AND longitude BETWEEN ?3 AND ?4 \
              ORDER BY imported_at DESC",
         )?;
-        let rows = stmt.query_map(
-            params![min_lat, max_lat, min_lon, max_lon],
-            row_to_asset,
-        )?;
+        let rows = stmt.query_map(params![min_lat, max_lat, min_lon, max_lon], row_to_asset)?;
         let mut out = Vec::new();
         for row in rows {
             let a = row?;
@@ -1343,9 +1310,11 @@ impl<'a> Repo<'a> {
     pub fn batch_remove_tag(&self, asset_ids: &[AssetId], tag_name: &str) -> Result<u32> {
         let tag_id: Option<String> = self
             .conn
-            .query_row("SELECT id FROM tags WHERE name = ?1", params![tag_name], |r| {
-                r.get(0)
-            })
+            .query_row(
+                "SELECT id FROM tags WHERE name = ?1",
+                params![tag_name],
+                |r| r.get(0),
+            )
             .optional()?;
         let Some(tag_id) = tag_id else { return Ok(0) };
         let tag_id = RowId::parse(&tag_id)?;
@@ -1361,9 +1330,11 @@ impl<'a> Repo<'a> {
         // Reuse an existing person with the same name when present.
         let existing: Option<String> = self
             .conn
-            .query_row("SELECT id FROM people WHERE name = ?1", params![person_name], |r| {
-                r.get(0)
-            })
+            .query_row(
+                "SELECT id FROM people WHERE name = ?1",
+                params![person_name],
+                |r| r.get(0),
+            )
             .optional()?;
         let person_id = match existing {
             Some(id) => RowId::parse(&id)?,
@@ -1405,6 +1376,7 @@ impl<'a> Repo<'a> {
 
     /// Index an asset into FTS. Called after the asset is `ready`.
     /// Prefer `reindex_asset_in` — this is the raw writer it delegates to.
+    #[allow(clippy::too_many_arguments)]
     pub fn index_asset(
         &self,
         tx: &Transaction<'_>,
@@ -1515,8 +1487,7 @@ fn row_to_asset(row: &rusqlite::Row<'_>) -> rusqlite::Result<Asset> {
         original_path: row.get("original_path")?,
         source_volume: row.get("source_volume")?,
         library_relpath: row.get("library_relpath")?,
-        status: AssetStatus::parse(&row.get::<_, String>("status")?)
-            .unwrap_or(AssetStatus::Failed),
+        status: AssetStatus::parse(&row.get::<_, String>("status")?).unwrap_or(AssetStatus::Failed),
         parse_errors: serde_json::from_str(&parse_errors).unwrap_or_default(),
         raw_metadata: serde_json::from_str(&raw_metadata).unwrap_or_default(),
         metadata: Vec::new(),

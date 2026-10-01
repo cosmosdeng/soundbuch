@@ -50,7 +50,10 @@ pub fn compute_wav_peaks(path: &Path, buckets: usize) -> Result<Vec<f32>> {
             let mut fmt = vec![0u8; size.min(40) as usize];
             r.read_exact(&mut fmt)?;
             if padded > fmt.len() as u64 {
-                std::io::copy(&mut r.by_ref().take(padded - fmt.len() as u64), &mut std::io::sink())?;
+                std::io::copy(
+                    &mut r.by_ref().take(padded - fmt.len() as u64),
+                    &mut std::io::sink(),
+                )?;
             }
             if fmt.len() >= 16 {
                 format = u16::from_le_bytes([fmt[0], fmt[1]]);
@@ -181,7 +184,7 @@ fn peaks_from_pcm<R: Read>(
     is_float: bool,
     buckets: usize,
 ) -> Result<Vec<f32>> {
-    let bytes_per_sample = ((bits + 7) / 8) as u64;
+    let bytes_per_sample = bits.div_ceil(8) as u64;
     let frame_bytes = bytes_per_sample * channels as u64;
     if frame_bytes == 0 {
         return Err(Error::other("zero frame size"));
@@ -213,11 +216,7 @@ fn peaks_from_pcm<R: Read>(
                 if s0 + bytes_per_sample as usize > n {
                     break;
                 }
-                let amp = sample_to_f32(
-                    &buf[s0..s0 + bytes_per_sample as usize],
-                    bits,
-                    is_float,
-                );
+                let amp = sample_to_f32(&buf[s0..s0 + bytes_per_sample as usize], bits, is_float);
                 frame_peak = frame_peak.max(amp.abs());
             }
             let bucket =
@@ -241,7 +240,7 @@ fn peaks_from_pcm_be<R: Read>(
     buckets: usize,
 ) -> Result<Vec<f32>> {
     // AIFF stores big-endian integers. Read frames and swap per sample width.
-    let bytes_per_sample = ((bits + 7) / 8) as u64;
+    let bytes_per_sample = bits.div_ceil(8) as u64;
     let frame_bytes = bytes_per_sample * channels as u64;
     if frame_bytes == 0 {
         return Err(Error::other("zero frame size"));
@@ -349,7 +348,7 @@ mod tests {
         let path = dir.path().join("t.wav");
         // First half silent, second half full scale.
         let mut samples = vec![0i16; 4410];
-        samples.extend(std::iter::repeat(30000i16).take(4410));
+        samples.extend(std::iter::repeat_n(30000i16, 4410));
         write_test_wav(&path, &samples).unwrap();
 
         let peaks = compute_wav_peaks(&path, 8).unwrap();
