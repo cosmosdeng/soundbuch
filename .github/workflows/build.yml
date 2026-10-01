@@ -1,0 +1,87 @@
+# Cross-platform CI: test then build unsigned test packages.
+#
+# Triggers:
+#   - push to main (every change gets tested + built)
+#   - workflow_dispatch (manually produce download artifacts)
+#
+# Artifacts (after a successful run → Actions → run → Artifacts):
+#   soundbuch-linux-x64
+#   soundbuch-windows-x64
+#   soundbuch-macos-arm64
+#
+# macOS packages are unsigned test builds.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test-and-build:
+    name: test + build (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            platform: linux-x64
+            bundle_glob: target/release/bundle/**
+          - os: windows-latest
+            platform: windows-x64
+            bundle_glob: target/release/bundle/**
+          - os: macos-14
+            platform: macos-arm64
+            bundle_glob: target/release/bundle/**
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Linux system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            libdbus-1-dev \
+            pkg-config
+
+      - name: Cache cargo
+        uses: swatinem/rust-cache@v2
+
+      - name: Format check
+        run: cargo fmt --check
+
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets
+
+      - name: Test
+        run: cargo test --workspace
+
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version "^2" --locked
+
+      - name: Tauri build
+        run: cargo tauri build
+
+      - name: Upload test package
+        uses: actions/upload-artifact@v4
+        with:
+          name: soundbuch-${{ matrix.platform }}
+          path: ${{ matrix.bundle_glob }}
+          if-no-files-found: warn
+          retention-days: 30
