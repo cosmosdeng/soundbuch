@@ -1446,6 +1446,7 @@ mod tests {
         stream_body.extend_from_slice(&0u32.to_le_bytes()); // err corr length
         stream_body.extend_from_slice(&0u16.to_le_bytes()); // flags
         stream_body.extend_from_slice(&0u32.to_le_bytes()); // reserved
+
         // type-specific: codec(2) channels(2) rate(4) avg_bytes(4) block(2) bits(2)
         stream_body.extend_from_slice(&0x0161u16.to_le_bytes()); // WMA v2
         stream_body.extend_from_slice(&2u16.to_le_bytes()); // channels
