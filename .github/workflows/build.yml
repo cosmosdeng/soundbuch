@@ -2,6 +2,7 @@
 #
 # Triggers:
 #   - push to main (every change gets tested + built)
+#   - push tag v* (also publishes a GitHub Release with the installers)
 #   - workflow_dispatch (manually produce download artifacts)
 #
 # Artifacts (after a successful run → Actions → run → Artifacts):
@@ -9,6 +10,7 @@
 #   soundbuch-windows-x64
 #   soundbuch-macos-arm64
 #
+# Tag push v* additionally uploads installers to a GitHub Release.
 # macOS packages are unsigned test builds.
 
 name: CI
@@ -16,6 +18,7 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   workflow_dispatch:
 
 env:
@@ -31,12 +34,21 @@ jobs:
           - os: ubuntu-22.04
             platform: linux-x64
             bundle_glob: target/release/bundle/**
+            release_files: |
+              target/release/bundle/deb/*.deb
+              target/release/bundle/appimage/*.AppImage
+              target/release/bundle/rpm/*.rpm
           - os: windows-latest
             platform: windows-x64
             bundle_glob: target/release/bundle/**
+            release_files: |
+              target/release/bundle/msi/*.msi
+              target/release/bundle/nsis/*-setup.exe
           - os: macos-14
             platform: macos-arm64
             bundle_glob: target/release/bundle/**
+            release_files: |
+              target/release/bundle/dmg/*.dmg
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -85,3 +97,11 @@ jobs:
           path: ${{ matrix.bundle_glob }}
           if-no-files-found: warn
           retention-days: 30
+
+      - name: Upload installers to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.release_files }}
+          fail_on_unmatched_files: true
+          generate_release_notes: true
