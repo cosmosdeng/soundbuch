@@ -105,14 +105,30 @@ fn extract_inner(
                 errors.push(format!("caf parse: {e}; file preserved"));
             }
         },
-        "wma" | "ogg" | "opus" => {
-            // MVP: allow import, keep container hint, record that full parse
-            // is deferred. File itself is preserved byte-for-byte.
-            audio.container = Some(ext.to_uppercase());
-            errors.push(format!(
-                "full metadata parse not implemented for .{ext}; file preserved"
-            ));
-        }
+        "ogg" | "opus" => match compressed::parse_ogg(path) {
+            Ok(parsed) => {
+                apply_audio(&mut audio, &parsed.audio);
+                for (k, v) in parsed.raw {
+                    raw.insert(k, v);
+                }
+            }
+            Err(e) => {
+                audio.container = Some("OGG".into());
+                errors.push(format!("ogg/opus parse: {e}; file preserved"));
+            }
+        },
+        "wma" => match compressed::parse_wma(path) {
+            Ok(parsed) => {
+                apply_audio(&mut audio, &parsed.audio);
+                for (k, v) in parsed.raw {
+                    raw.insert(k, v);
+                }
+            }
+            Err(e) => {
+                audio.container = Some("WMA".into());
+                errors.push(format!("wma parse: {e}; file preserved"));
+            }
+        },
         _ => {
             errors.push(format!("unknown container .{ext}"));
         }
