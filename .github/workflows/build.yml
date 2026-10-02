@@ -34,21 +34,12 @@ jobs:
           - os: ubuntu-22.04
             platform: linux-x64
             bundle_glob: target/release/bundle/**
-            release_files: |
-              target/release/bundle/deb/*.deb
-              target/release/bundle/appimage/*.AppImage
-              target/release/bundle/rpm/*.rpm
           - os: windows-latest
             platform: windows-x64
             bundle_glob: target/release/bundle/**
-            release_files: |
-              target/release/bundle/msi/*.msi
-              target/release/bundle/nsis/*-setup.exe
           - os: macos-14
             platform: macos-arm64
             bundle_glob: target/release/bundle/**
-            release_files: |
-              target/release/bundle/dmg/*.dmg
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -98,10 +89,46 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+  release:
+    name: publish GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: test-and-build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download linux installers
+        uses: actions/download-artifact@v4
+        with:
+          name: soundbuch-linux-x64
+          path: installers/linux
+
+      - name: Download windows installers
+        uses: actions/download-artifact@v4
+        with:
+          name: soundbuch-windows-x64
+          path: installers/windows
+
+      - name: Download macos installers
+        uses: actions/download-artifact@v4
+        with:
+          name: soundbuch-macos-arm64
+          path: installers/macos
+
+      - name: Collect installer files
+        run: |
+          mkdir -p dist
+          cp installers/linux/deb/*.deb dist/
+          cp installers/linux/appimage/*.AppImage dist/
+          cp installers/linux/rpm/*.rpm dist/
+          cp installers/windows/msi/*.msi dist/
+          cp installers/windows/nsis/*-setup.exe dist/
+          cp installers/macos/dmg/*.dmg dist/
+          ls -lh dist/
+
       - name: Upload installers to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ matrix.release_files }}
+          files: dist/*
           fail_on_unmatched_files: true
           generate_release_notes: true
