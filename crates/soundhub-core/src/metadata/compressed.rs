@@ -1477,7 +1477,8 @@ mod tests {
         let stream_obj = asf_object(ASF_STREAM_PROPS, &stream_body);
         let cd_obj = asf_object(ASF_CONTENT_DESC, &cd_body);
 
-        let header_size = 24 + file_obj.len() + stream_obj.len() + cd_obj.len();
+        // ASF Header Object = GUID(16)+size(8)+count(4)+reserved(2) = 30 bytes.
+        let header_size = 30 + file_obj.len() + stream_obj.len() + cd_obj.len();
         let mut head = Vec::new();
         head.extend_from_slice(&ASF_HEADER);
         head.extend_from_slice(&(header_size as u64).to_le_bytes());
