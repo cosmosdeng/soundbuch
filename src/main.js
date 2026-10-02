@@ -64,7 +64,7 @@ const state = {
   },
 };
 
-// ── i18n (MVP: English + 简体中文) ─────────────────────────────────────────
+// ── i18n (English + 简体中文) ──────────────────────────────────────────────
 
 const I18N = {
   en: {
@@ -105,6 +105,196 @@ const I18N = {
     suggested: "Suggested",
     assetCount: (n) => `${n} assets`,
     dbSize: (n) => `${(n / 1024).toFixed(1)} KB`,
+
+    // ── main app ──
+    searchPlaceholder: "Search filename, tag, person, location…",
+    search: "Search",
+    navAll: "All Sounds",
+    navRecent: "Recent",
+    navMap: "Map",
+    navTrash: "Recycle Bin",
+    navDupes: "Duplicates",
+    navPlaylists: "Playlists",
+    navSettings: "Settings",
+    collections: "Collections",
+    tags: "Tags",
+    newCollection: "+ Collection",
+    newSmart: "+ Smart",
+    manage: "Manage",
+    tagAll: "Tags: ALL",
+    tagAny: "Tags: ANY",
+    tagMatchTitle: "How multiple tags combine",
+    import: "Import",
+    resumeIncomplete: "Resume Incomplete",
+    multiSelect: "Multi-select",
+    multiSelectTitle: "Multi-select for batch edit",
+    delete: "Delete",
+    deleteTitle: "Move selection to recycle bin",
+    undo: "↩ Undo",
+    undoTitle: "Undo last action",
+    emptyBin: "Empty Bin",
+    emptyBinTitle: "Permanently delete all trashed items",
+    trashBar: "Recycle bin — restore or permanently delete",
+    restoreSelected: "Restore selected",
+    deleteForever: "Delete forever",
+    dupesBar: "Content-identical copies (SHA-256)",
+    keepOldest: "Keep oldest",
+    keepNewest: "Keep newest",
+    keepLowestId: "Keep lowest id",
+    cleanAllGroups: "Clean all groups",
+    newPlaylist: "+ New",
+    addSelected: "Add selected",
+    playlistName: "Playlist name",
+    selectedCount: (n) => `${n} selected`,
+    tagName: "Tag name",
+    addTag: "+ Tag",
+    removeTag: "− Tag",
+    personName: "Person name",
+    addPerson: "+ Person",
+    collectionPick: "Collection…",
+    addCol: "+ Col",
+    removeCol: "− Col",
+    clear: "Clear",
+    colFilename: "Filename",
+    colDuration: "Duration",
+    colFormat: "Format",
+    colRecorded: "Recorded",
+    colSize: "Size",
+    emptyState: "No sounds yet. Click Import to add files.",
+    gpsAssets: "GPS assets — click a point to select",
+    selectSound: "Select a sound to see details.",
+    importAudio: "Import Audio",
+    dropFiles: "Drop files or folders here",
+    selectFiles: "Select Files…",
+    selectFolder: "Select Folder…",
+    manualPathPlaceholder: "Or type a full file/folder path…",
+    scan: "Scan",
+    close: "Close",
+    dupSkip: "Duplicate: Skip (default)",
+    dupImport: "Duplicate: Import as duplicate",
+    dupCancel: "Duplicate: Cancel",
+    unfinishedImports: "Unfinished Imports",
+    newSmartCollection: "New Smart Collection",
+    name: "Name",
+    namePlaceholder: "e.g. Field HD",
+    match: "Match",
+    matchAll: "All conditions (AND)",
+    matchAny: "Any condition (OR)",
+    condition: "Condition",
+    fieldTag: "Tag",
+    fieldPerson: "Person",
+    fieldFilename: "Filename contains",
+    fieldText: "Full-text",
+    fieldSampleRate: "Sample rate",
+    fieldHasGps: "Has GPS",
+    fieldRecordedAfter: "Recorded after",
+    opIs: "is",
+    opIsNot: "is not",
+    opContains: "contains",
+    opEq: "=",
+    opGte: "≥",
+    opLte: "≤",
+    valuePlaceholder: "value",
+    smartHint: "One condition per collection for now. JSON rules can be extended later.",
+    create: "Create",
+    cancel: "Cancel",
+
+    // ── detail panel ──
+    addPersonPlaceholder: "Add person…",
+    addTagPlaceholder: "Add tag…",
+    smartCollection: "Smart collection",
+    staticCollection: "Static collection",
+    remove: "Remove",
+    clickToSeek: "Click to seek",
+    play: "Play",
+    pause: "Pause",
+    noGps: "No GPS-tagged assets yet.",
+    filename: "Filename",
+    duration: "Duration",
+    format: "Format",
+    recorded: "Recorded",
+    size: "Size",
+    sampleRate: "Sample rate",
+    bitDepth: "Bit depth",
+    channels: "Channels",
+    codec: "Codec",
+    container: "Container",
+    bitrate: "Bitrate",
+    hash: "Hash",
+    originalPath: "Original path",
+    people: "People",
+    notes: "Notes",
+    location: "Location",
+    technical: "Technical",
+    identity: "Identity",
+    importSource: "Import source",
+    imported: "Imported",
+    collectionsLabel: "Collections",
+    addToCollection: "Add to collection…",
+    assetId: "Asset ID",
+    sha256: "SHA-256",
+    parseNotes: "Parse notes",
+
+    // ── settings ──
+    settings: "Settings",
+    interfaceLanguage: "Interface language",
+    languageHint: "Choose the language for the interface.",
+    langEn: "English",
+    langZh: "中文",
+    about: "About",
+    aboutText: "soundbuch — local sound asset manager. Originals are never modified.",
+
+    // ── actions / messages ──
+    folderPath: "Folder path:",
+    selectAudioFiles: "Select audio files",
+    audioFiles: "Audio",
+    selectFolderToImport: "Select folder to import",
+    collectionName: "Collection name:",
+    playlistNamePrompt: "Playlist name:",
+    selectPlaylistFirst: "Select a playlist first.",
+    selectAssetsFirst:
+      "Select assets in the All Sounds view first (Multi-select).",
+    selectOneOrMore: "Select one or more assets first (use Multi-select).",
+    emptyTrashConfirm:
+      "Permanently delete ALL items in the recycle bin?",
+    collapseDupesConfirm:
+      "Collapse ALL duplicate groups? Extra copies go to the recycle bin (undoable).",
+    cleanUpConfirm:
+      "Clean Up discards unfinished copies for this import. Ready assets are kept. Continue?",
+    targetTagNotFound: "Target tag not found.",
+    noDupes: "No in-library duplicates. Nice.",
+    openingPicker: "Opening file picker…",
+    noFilesSelected:
+      "No files selected (or picker failed — use the path box below).",
+    openingFolderPicker: "Opening folder picker…",
+    noFolderSelected:
+      "No folder selected (or picker failed — use the path box below).",
+    typePathFirst: "Type a file or folder path first.",
+    noPathsToScan: "No paths to scan.",
+    scanning: "Scanning…",
+    importing: "Importing…",
+    retrying: "Retrying…",
+    resuming: "Resuming…",
+    nothingToUndo: "Nothing to undo",
+    undoLabel: (label) => `Undo: ${label}`,
+    failed: "Failed",
+    readyChoose: (n) => `Ready (${n}). Choose files, a folder, or type a path.`,
+    backendPingFailed: (e) => `Backend ping failed: ${e}`,
+    filePickerError: (e) => `File picker error: ${e}`,
+    folderPickerError: (e) => `Folder picker error: ${e}`,
+    scanningPaths: (n) => `Scanning ${n} path(s)… hashing may take a while.`,
+    scanOk: (n) => `Scan OK: ${n} ready.`,
+    scanFailed: (e) => `Scan failed: ${e}`,
+    importedCount: (n) => `Imported ${n} file(s).`,
+    importFailed: (e) => `Import failed: ${e}`,
+    moveItemsConfirm: (n) => `Move ${n} item(s) to the recycle bin?`,
+    purgeItemsConfirm: (n) =>
+      `Permanently delete ${n} item(s)? This cannot be undone.`,
+    renameTagPrompt: (name) => `Rename "${name}" to:`,
+    deleteTagConfirm: (name) =>
+      `Delete tag "${name}" from all assets? (undoable)`,
+    mergeTagPrompt: (name, list) =>
+      `Merge "${name}" INTO which tag?\nAvailable: ${list}`,
   },
   zh: {
     tagline: "声音资产库",
@@ -144,6 +334,187 @@ const I18N = {
     suggested: "推荐位置",
     assetCount: (n) => `${n} 个资产`,
     dbSize: (n) => `${(n / 1024).toFixed(1)} KB`,
+
+    // ── 主界面 ──
+    searchPlaceholder: "搜索文件名、标签、人物、地点…",
+    search: "搜索",
+    navAll: "全部声音",
+    navRecent: "最近",
+    navMap: "地图",
+    navTrash: "回收站",
+    navDupes: "重复项",
+    navPlaylists: "播放列表",
+    navSettings: "设置",
+    collections: "集合",
+    tags: "标签",
+    newCollection: "+ 集合",
+    newSmart: "+ 智能",
+    manage: "管理",
+    tagAll: "标签：全部",
+    tagAny: "标签：任一",
+    tagMatchTitle: "多个标签如何组合",
+    import: "导入",
+    resumeIncomplete: "继续未完成",
+    multiSelect: "多选",
+    multiSelectTitle: "多选后可批量编辑",
+    delete: "删除",
+    deleteTitle: "将所选移入回收站",
+    undo: "↩ 撤销",
+    undoTitle: "撤销上一步操作",
+    emptyBin: "清空回收站",
+    emptyBinTitle: "永久删除回收站中的全部条目",
+    trashBar: "回收站 — 可恢复或永久删除",
+    restoreSelected: "恢复所选",
+    deleteForever: "永久删除",
+    dupesBar: "内容完全相同的副本（SHA-256）",
+    keepOldest: "保留最旧",
+    keepNewest: "保留最新",
+    keepLowestId: "保留 ID 最小",
+    cleanAllGroups: "清理全部分组",
+    newPlaylist: "+ 新建",
+    addSelected: "加入所选",
+    playlistName: "播放列表名称",
+    selectedCount: (n) => `已选 ${n} 项`,
+    tagName: "标签名",
+    addTag: "+ 标签",
+    removeTag: "− 标签",
+    personName: "人物名",
+    addPerson: "+ 人物",
+    collectionPick: "集合…",
+    addCol: "+ 集合",
+    removeCol: "− 集合",
+    clear: "清除",
+    colFilename: "文件名",
+    colDuration: "时长",
+    colFormat: "格式",
+    colRecorded: "录制时间",
+    colSize: "大小",
+    emptyState: "还没有声音。点击「导入」添加文件。",
+    gpsAssets: "带 GPS 的资产 — 点击圆点选中",
+    selectSound: "选择一个声音查看详情。",
+    importAudio: "导入音频",
+    dropFiles: "把文件或文件夹拖到这里",
+    selectFiles: "选择文件…",
+    selectFolder: "选择文件夹…",
+    manualPathPlaceholder: "或直接输入完整文件/文件夹路径…",
+    scan: "扫描",
+    close: "关闭",
+    dupSkip: "重复：跳过（默认）",
+    dupImport: "重复：作为副本导入",
+    dupCancel: "重复：取消导入",
+    unfinishedImports: "未完成的导入",
+    newSmartCollection: "新建智能集合",
+    name: "名称",
+    namePlaceholder: "例如：外景 HD",
+    match: "匹配",
+    matchAll: "满足所有条件（AND）",
+    matchAny: "满足任一条件（OR）",
+    condition: "条件",
+    fieldTag: "标签",
+    fieldPerson: "人物",
+    fieldFilename: "文件名包含",
+    fieldText: "全文",
+    fieldSampleRate: "采样率",
+    fieldHasGps: "有 GPS",
+    fieldRecordedAfter: "录制于之后",
+    opIs: "是",
+    opIsNot: "不是",
+    opContains: "包含",
+    opEq: "=",
+    opGte: "≥",
+    opLte: "≤",
+    valuePlaceholder: "值",
+    smartHint: "目前每个集合支持一个条件。JSON 规则可后续扩展。",
+    create: "创建",
+    cancel: "取消",
+
+    // ── 详情面板 ──
+    addPersonPlaceholder: "添加人物…",
+    addTagPlaceholder: "添加标签…",
+    smartCollection: "智能集合",
+    staticCollection: "普通集合",
+    remove: "移除",
+    clickToSeek: "点击跳转",
+    play: "播放",
+    pause: "暂停",
+    noGps: "暂无带 GPS 的资产。",
+    filename: "文件名",
+    duration: "时长",
+    format: "格式",
+    recorded: "录制时间",
+    size: "大小",
+    sampleRate: "采样率",
+    bitDepth: "位深",
+    channels: "声道",
+    codec: "编码",
+    container: "容器",
+    bitrate: "码率",
+    hash: "哈希",
+    originalPath: "原始路径",
+    people: "人物",
+    notes: "备注",
+    location: "地点",
+    technical: "技术参数",
+    identity: "标识",
+    importSource: "导入来源",
+    imported: "导入时间",
+    collectionsLabel: "集合",
+    addToCollection: "加入集合…",
+    assetId: "资产 ID",
+    sha256: "SHA-256",
+    parseNotes: "解析备注",
+
+    // ── 设置 ──
+    settings: "设置",
+    interfaceLanguage: "界面语言",
+    languageHint: "选择界面显示语言。",
+    langEn: "English",
+    langZh: "中文",
+    about: "关于",
+    aboutText: "soundbuch — 本地声音资产管理器。原始文件永不修改。",
+
+    // ── 操作与提示 ──
+    folderPath: "文件夹路径：",
+    selectAudioFiles: "选择音频文件",
+    audioFiles: "音频",
+    selectFolderToImport: "选择要导入的文件夹",
+    collectionName: "集合名称：",
+    playlistNamePrompt: "播放列表名称：",
+    selectPlaylistFirst: "请先选择一个播放列表。",
+    selectAssetsFirst: "请先在「全部声音」中多选资产。",
+    selectOneOrMore: "请先选择一个或多个资产（用多选）。",
+    emptyTrashConfirm: "确定永久删除回收站中的全部条目？",
+    collapseDupesConfirm: "确定合并全部重复分组？多余副本将移入回收站（可撤销）。",
+    cleanUpConfirm: "清理会丢弃本次导入中未完成的副本，已就绪的资产会保留。继续？",
+    targetTagNotFound: "未找到目标标签。",
+    noDupes: "库内没有重复项。",
+    openingPicker: "正在打开文件选择器…",
+    noFilesSelected: "未选择文件（或选择器失败 — 请用下方路径框）。",
+    openingFolderPicker: "正在打开文件夹选择器…",
+    noFolderSelected: "未选择文件夹（或选择器失败 — 请用下方路径框）。",
+    typePathFirst: "请先输入文件或文件夹路径。",
+    noPathsToScan: "没有可扫描的路径。",
+    scanning: "扫描中…",
+    importing: "导入中…",
+    retrying: "重试中…",
+    resuming: "继续中…",
+    nothingToUndo: "没有可撤销的操作",
+    undoLabel: (label) => `撤销：${label}`,
+    failed: "失败",
+    readyChoose: (n) => `就绪（${n}）。请选择文件、文件夹，或输入路径。`,
+    backendPingFailed: (e) => `后端连接失败：${e}`,
+    filePickerError: (e) => `文件选择器出错：${e}`,
+    folderPickerError: (e) => `文件夹选择器出错：${e}`,
+    scanningPaths: (n) => `正在扫描 ${n} 个路径… 哈希计算可能较慢。`,
+    scanOk: (n) => `扫描完成：${n} 个就绪。`,
+    scanFailed: (e) => `扫描失败：${e}`,
+    importedCount: (n) => `已导入 ${n} 个文件。`,
+    importFailed: (e) => `导入失败：${e}`,
+    moveItemsConfirm: (n) => `将 ${n} 个条目移入回收站？`,
+    purgeItemsConfirm: (n) => `确定永久删除 ${n} 个条目？此操作不可撤销。`,
+    renameTagPrompt: (name) => `把「${name}」重命名为：`,
+    deleteTagConfirm: (name) => `从所有资产上删除标签「${name}」？（可撤销）`,
+    mergeTagPrompt: (name, list) => `把「${name}」合并到哪个标签？\n可选：${list}`,
   },
 };
 
@@ -155,27 +526,43 @@ function t(key) {
 }
 
 function applyI18n() {
+  document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     const key = el.getAttribute("data-i18n");
     const val = t(key);
     if (typeof val === "function") return;
     el.textContent = val;
   });
-  document.querySelectorAll(".lang-btn").forEach((b) => {
-    b.classList.toggle("active", b.dataset.lang === lang);
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+    const key = el.getAttribute("data-i18n-placeholder");
+    el.setAttribute("placeholder", t(key));
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+    const key = el.getAttribute("data-i18n-title");
+    el.setAttribute("title", t(key));
+  });
+  document.querySelectorAll(".lang-btn, .lang-option").forEach((b) => {
+    b.classList.toggle("active", (b.dataset.lang || b.value) === lang);
   });
   // Re-render dynamic bits
   renderRecent();
   updateCreatePreview();
   updateOpenInspection();
+  if (state.currentView) {
+    renderSidebarChips();
+    refresh().catch(() => {});
+    renderSettings();
+  }
+}
+
+function setLang(next) {
+  lang = next;
+  localStorage.setItem("soundhub_lang", lang);
+  applyI18n();
 }
 
 document.querySelectorAll(".lang-btn").forEach((b) => {
-  b.addEventListener("click", () => {
-    lang = b.dataset.lang;
-    localStorage.setItem("soundhub_lang", lang);
-    applyI18n();
-  });
+  b.addEventListener("click", () => setLang(b.dataset.lang));
 });
 
 // ── Library setup ──────────────────────────────────────────────────────────
@@ -278,7 +665,7 @@ async function pickDirectory(title) {
     return null;
   } catch (e) {
     log("pick_directory failed", e);
-    return window.prompt(title || "Folder path:") || null;
+    return window.prompt(title || t("folderPath")) || null;
   }
 }
 
@@ -287,10 +674,10 @@ async function pickFiles() {
     if (tauriDialog?.open) {
       const files = await tauriDialog.open({
         multiple: true,
-        title: "Select audio files",
+        title: t("selectAudioFiles"),
         filters: [
           {
-            name: "Audio",
+            name: t("audioFiles"),
             extensions: ["wav", "bwf", "aif", "aiff", "flac", "mp3", "m4a", "aac", "caf"],
           },
         ],
@@ -312,7 +699,7 @@ async function pickFiles() {
 }
 
 async function pickFolder() {
-  return await pickDirectory("Select folder to import");
+  return await pickDirectory(t("selectFolderToImport"));
 }
 
 // Recent libraries
@@ -598,7 +985,7 @@ function renderSidebarChips() {
       ? state.collections
           .map((c) => {
             const badge = c.collection_type === "smart" ? " ⚡" : "";
-            return `<span class="chip${state.filter.collectionId === c.id ? " active" : ""}" data-col="${escapeAttr(c.id)}" data-name="${escapeAttr(c.name)}" title="${c.collection_type === "smart" ? "Smart collection" : "Static collection"}">${escapeHtml(c.name)}${badge}</span>`;
+            return `<span class="chip${state.filter.collectionId === c.id ? " active" : ""}" data-col="${escapeAttr(c.id)}" data-name="${escapeAttr(c.name)}" title="${c.collection_type === "smart" ? t("smartCollection") : t("staticCollection")}">${escapeHtml(c.name)}${badge}</span>`;
           })
           .join("")
       : '<span class="muted" style="font-size:12px">—</span>';
@@ -620,6 +1007,27 @@ function renderSidebarChips() {
 // ── Assets list / detail ───────────────────────────────────────────────────
 
 async function refresh() {
+  // Settings view replaces the asset table with the settings panel.
+  if (state.currentView === "settings") {
+    $("map-panel")?.classList.add("hidden");
+    $("settings-panel")?.classList.remove("hidden");
+    $("asset-rows")?.parentElement?.classList.add("hidden");
+    $("empty-state")?.classList.add("hidden");
+    $("trash-bar")?.classList.add("hidden");
+    $("dupes-bar")?.classList.add("hidden");
+    $("playlist-bar")?.classList.add("hidden");
+    $("batch-bar")?.classList.add("hidden");
+    $("btn-delete")?.classList.add("hidden");
+    $("btn-empty-trash")?.classList.add("hidden");
+    $("btn-import")?.classList.add("hidden");
+    $("btn-multi")?.classList.add("hidden");
+    renderSettings();
+    return;
+  }
+  $("settings-panel")?.classList.add("hidden");
+  $("btn-import")?.classList.remove("hidden");
+  $("btn-multi")?.classList.remove("hidden");
+
   // Map view loads GPS points instead of the table.
   if (state.currentView === "map") {
     await showMap();
@@ -749,7 +1157,7 @@ function drawMap() {
   if (!mapPoints.length) {
     ctx.fillStyle = "#6b7c93";
     ctx.font = "14px sans-serif";
-    ctx.fillText("No GPS-tagged assets yet.", 24, 32);
+    ctx.fillText(t("noGps"), 24, 32);
     if (legend) legend.textContent = "Import recordings with BWF/iXML GPS to see them here.";
     return;
   }
@@ -919,7 +1327,7 @@ function updateBatchBar() {
   bar.classList.toggle("hidden", !state.multiSelect);
   const n = state.selectedSet?.size ?? 0;
   const el = $("batch-count");
-  if (el) el.textContent = `${n} selected`;
+  if (el) el.textContent = t("selectedCount")(n);
 }
 
 async function selectAsset(id) {
@@ -936,44 +1344,44 @@ function renderDetail(d) {
     arr.length
       ? arr
           .map(
-            (t) =>
-              `<span class="chip removable" data-kind="${kind}" data-id="${escapeAttr(t.id)}">${escapeHtml(t.name)}<button type="button" class="chip-x" data-kind="${kind}" data-id="${escapeAttr(t.id)}" title="Remove">×</button></span>`
+            (item) =>
+              `<span class="chip removable" data-kind="${kind}" data-id="${escapeAttr(item.id)}">${escapeHtml(item.name)}<button type="button" class="chip-x" data-kind="${kind}" data-id="${escapeAttr(item.id)}" title="${t("remove")}">×</button></span>`
           )
           .join("")
       : '<span class="muted">—</span>';
 
   $("detail-panel").innerHTML = `
     <div class="player" id="player-box">
-      <div class="waveform-wrap" id="waveform-wrap" title="Click to seek">
+      <div class="waveform-wrap" id="waveform-wrap" title="${t("clickToSeek")}">
         <canvas id="waveform"></canvas>
         <div class="waveform-played" id="waveform-played" style="width:0"></div>
       </div>
       <div class="player-controls">
-        <button type="button" id="btn-play" class="primary" title="Play">▶</button>
+        <button type="button" id="btn-play" class="primary" title="${t("play")}">▶</button>
         <span class="time" id="player-time">0:00 / 0:00</span>
       </div>
       <div class="player-note muted" id="player-note"></div>
     </div>
     <h3>${escapeHtml(a.filename)}</h3>
-    <div class="row"><div class="label">Duration</div><div class="value">${fmtDuration(a.duration_ms)}</div></div>
-    <div class="row"><div class="label">Format</div><div class="value">${
+    <div class="row"><div class="label">${t("duration")}</div><div class="value">${fmtDuration(a.duration_ms)}</div></div>
+    <div class="row"><div class="label">${t("format")}</div><div class="value">${
       a.sample_rate ? `${a.sample_rate / 1000} kHz` : "—"
     } / ${a.bit_depth ?? "—"} bit / ${a.channels ?? "—"} ch<br/>${escapeHtml(d.codec ?? "—")} · ${escapeHtml(d.container ?? "—")}</div></div>
-    <div class="row"><div class="label">Recorded</div><div class="value">${escapeHtml(fmtDate(a.recorded_at))}</div></div>
-    <div class="row"><div class="label">Imported</div><div class="value">${escapeHtml(fmtDate(a.imported_at))}</div></div>
-    <div class="row"><div class="label">Location</div><div class="value">${
+    <div class="row"><div class="label">${t("recorded")}</div><div class="value">${escapeHtml(fmtDate(a.recorded_at))}</div></div>
+    <div class="row"><div class="label">${t("imported")}</div><div class="value">${escapeHtml(fmtDate(a.imported_at))}</div></div>
+    <div class="row"><div class="label">${t("location")}</div><div class="value">${
       d.latitude != null ? `${d.latitude}, ${d.longitude}` : "—"
     }</div></div>
-    <div class="row"><div class="label">People</div><div class="chips">${chips(d.people, "person")}</div>
+    <div class="row"><div class="label">${t("people")}</div><div class="chips">${chips(d.people, "person")}</div>
       <div class="add-row">
-        <input id="add-person-input" type="text" placeholder="Add person…" />
+        <input id="add-person-input" type="text" placeholder="${t("addPersonPlaceholder")}" />
         <button type="button" class="small" id="btn-add-person">+</button>
       </div>
     </div>
-    <div class="row"><div class="label">Collections</div><div class="chips">${chips(d.collections, "collection")}</div>
+    <div class="row"><div class="label">${t("collectionsLabel")}</div><div class="chips">${chips(d.collections, "collection")}</div>
       <div class="add-row">
         <select id="add-collection-select">
-          <option value="">Add to collection…</option>
+          <option value="">${t("addToCollection")}</option>
           ${state.collections
             .map((c) => {
               const already = d.collections.some((x) => x.id === c.id);
@@ -984,18 +1392,18 @@ function renderDetail(d) {
         <button type="button" class="small" id="btn-add-collection">+</button>
       </div>
     </div>
-    <div class="row"><div class="label">Tags</div><div class="chips">${chips(d.tags, "tag")}</div>
+    <div class="row"><div class="label">${t("tags")}</div><div class="chips">${chips(d.tags, "tag")}</div>
       <div class="add-row">
-        <input id="add-tag-input" type="text" placeholder="Add tag…" />
+        <input id="add-tag-input" type="text" placeholder="${t("addTagPlaceholder")}" />
         <button type="button" class="small" id="btn-add-tag">+</button>
       </div>
     </div>
-    <div class="row"><div class="label">Original path</div><div class="value muted">${escapeHtml(a.original_path)}</div></div>
-    <div class="row"><div class="label">Asset ID</div><div class="value muted">${escapeHtml(a.id)}</div></div>
-    <div class="row"><div class="label">SHA-256</div><div class="value muted" style="font-size:11px">${escapeHtml(a.hash)}</div></div>
+    <div class="row"><div class="label">${t("originalPath")}</div><div class="value muted">${escapeHtml(a.original_path)}</div></div>
+    <div class="row"><div class="label">${t("assetId")}</div><div class="value muted">${escapeHtml(a.id)}</div></div>
+    <div class="row"><div class="label">${t("sha256")}</div><div class="value muted" style="font-size:11px">${escapeHtml(a.hash)}</div></div>
     ${
       d.parse_errors?.length
-        ? `<div class="row"><div class="label">Parse notes</div><div class="value" style="color:var(--danger)">${d.parse_errors.map((e) => escapeHtml(e)).join("<br/>")}</div></div>`
+        ? `<div class="row"><div class="label">${t("parseNotes")}</div><div class="value" style="color:var(--danger)">${d.parse_errors.map((e) => escapeHtml(e)).join("<br/>")}</div></div>`
         : ""
     }
   `;
@@ -1324,10 +1732,10 @@ $("btn-import").addEventListener("click", async () => {
   try {
     const pong = await invoke("debug_ping");
     log("debug_ping", pong);
-    setMsg("import-status", `Ready (${pong}). Choose files, a folder, or type a path.`);
+    setMsg("import-status", t("readyChoose")(pong));
   } catch (e) {
     log("debug_ping failed", e);
-    setMsg("import-status", `Backend ping failed: ${e}`, "error");
+    setMsg("import-status", t("backendPingFailed")(e), "error");
   }
 });
 
@@ -1336,36 +1744,36 @@ $("btn-close-import").addEventListener("click", () => {
 });
 
 $("btn-select-files").addEventListener("click", async () => {
-  setMsg("import-status", "Opening file picker…");
+  setMsg("import-status", t("openingPicker"));
   try {
     const files = await pickFiles();
     log("picked files", files);
     if (!files || !files.length) {
-      setMsg("import-status", "No files selected (or picker failed — use the path box below).");
+      setMsg("import-status", t("noFilesSelected"));
       return;
     }
     state.pendingPaths = Array.isArray(files) ? files : [files];
     await previewScan();
   } catch (e) {
     log("select-files error", e);
-    setMsg("import-status", `File picker error: ${e}`, "error");
+    setMsg("import-status", t("filePickerError")(e), "error");
   }
 });
 
 $("btn-select-folder").addEventListener("click", async () => {
-  setMsg("import-status", "Opening folder picker…");
+  setMsg("import-status", t("openingFolderPicker"));
   try {
     const folder = await pickFolder();
     log("picked folder", folder);
     if (!folder) {
-      setMsg("import-status", "No folder selected (or picker failed — use the path box below).");
+      setMsg("import-status", t("noFolderSelected"));
       return;
     }
     state.pendingPaths = [folder];
     await previewScan();
   } catch (e) {
     log("select-folder error", e);
-    setMsg("import-status", `Folder picker error: ${e}`, "error");
+    setMsg("import-status", t("folderPickerError")(e), "error");
   }
 });
 
@@ -1376,7 +1784,7 @@ if (btnAddPath) {
     const input = $("manual-path");
     const p = (input?.value || "").trim();
     if (!p) {
-      setMsg("import-status", "Type a file or folder path first.");
+      setMsg("import-status", t("typePathFirst"));
       return;
     }
     state.pendingPaths = [p];
@@ -1421,17 +1829,17 @@ if (drop) {
 
 async function previewScan() {
   if (!state.pendingPaths.length) {
-    setMsg("import-status", "No paths to scan.");
+    setMsg("import-status", t("noPathsToScan"));
     return;
   }
   const el = $("scan-result");
   const btn = $("btn-start-import");
   if (el) {
     el.classList.remove("hidden");
-    el.textContent = `Scanning ${state.pendingPaths.length} path(s)… hashing may take a while.`;
+    el.textContent = t("scanningPaths")(state.pendingPaths.length);
   }
   if (btn) btn.classList.add("hidden");
-  setMsg("import-status", "Scanning…");
+  setMsg("import-status", t("scanning"));
   log("scan_paths", state.pendingPaths);
   try {
     const scan = await invoke("scan_paths", { paths: state.pendingPaths });
@@ -1448,12 +1856,12 @@ async function previewScan() {
       </div>
     `;
     btn.classList.remove("hidden");
-    setMsg("import-status", `Scan OK: ${scan.ready} ready.`);
+    setMsg("import-status", t("scanOk")(scan.ready), "ok");
   } catch (e) {
     log("scan failed", e);
     el.classList.remove("hidden");
     el.textContent = `Scan failed: ${e}`;
-    setMsg("import-status", `Scan failed: ${e}`, "error");
+    setMsg("import-status", t("scanFailed")(e), "error");
   }
 }
 
@@ -1462,9 +1870,9 @@ $("btn-start-import").addEventListener("click", async () => {
   const onDuplicate = $("duplicate-action").value;
   const progress = $("import-progress");
   progress.classList.remove("hidden");
-  progress.textContent = "Importing…";
+  progress.textContent = t("importing");
   $("btn-start-import").disabled = true;
-  setMsg("import-status", "Importing…");
+  setMsg("import-status", t("importing"));
   log("import_paths", state.pendingPaths, onDuplicate);
   try {
     const r = await invoke("import_paths", {
@@ -1476,12 +1884,12 @@ $("btn-start-import").addEventListener("click", async () => {
       <strong>Import complete</strong><br/>
       ${r.success} imported · ${r.duplicate} duplicate · ${r.unsupported} unsupported · ${r.failed} failed
     `;
-    setMsg("import-status", `Imported ${r.success} file(s).`, "ok");
+    setMsg("import-status", t("importedCount")(r.success), "ok");
     await refresh();
   } catch (e) {
     log("import failed", e);
     progress.textContent = `Import failed: ${e}`;
-    setMsg("import-status", `Import failed: ${e}`, "error");
+    setMsg("import-status", t("importFailed")(e), "error");
   } finally {
     $("btn-start-import").disabled = false;
   }
@@ -1501,8 +1909,8 @@ async function checkRecovery() {
       $("btn-recovery").classList.remove("hidden");
       $("btn-recovery").textContent =
         jobs?.length > 0
-          ? `Resume Incomplete (${jobs.length})`
-          : "Resume Incomplete";
+          ? `${t("resumeIncomplete")} (${jobs.length})`
+          : t("resumeIncomplete");
     }
   } catch (_) {
     try {
@@ -1546,9 +1954,7 @@ $("btn-recovery").addEventListener("click", async () => {
       all.forEach((b) => (b.disabled = true));
 
       if (act === "cleanup") {
-        const ok = window.confirm(
-          "Clean Up discards unfinished copies for this import. Ready assets are kept. Continue?"
-        );
+        const ok = window.confirm(t("cleanUpConfirm"));
         if (!ok) {
           all.forEach((b) => (b.disabled = false));
           return;
@@ -1567,7 +1973,7 @@ $("btn-recovery").addEventListener("click", async () => {
         return;
       }
 
-      const label = act === "retry" ? "Retrying…" : "Resuming…";
+      const label = act === "retry" ? t("retrying") : t("resuming");
       btn.textContent = label;
       try {
         const r = await invoke(act === "retry" ? "retry_job" : "resume_job", {
@@ -1591,7 +1997,7 @@ $("btn-close-recovery").addEventListener("click", () => {
 // ── Quick actions ──────────────────────────────────────────────────────────
 
 $("btn-new-collection").addEventListener("click", async () => {
-  const name = window.prompt("Collection name:");
+  const name = window.prompt(t("collectionName"));
   if (!name) return;
   await invoke("create_collection", {
     name,
@@ -1717,7 +2123,7 @@ async function showDuplicates() {
   title.className = "section-label";
   title.textContent = groups.length
     ? `${groups.length} duplicate group(s) — same bytes, different entries`
-    : "No in-library duplicates. Nice.";
+    : t("noDupes");
   panel.appendChild(title);
 
   for (const g of groups) {
@@ -1765,7 +2171,7 @@ async function showDuplicates() {
 
 $("btn-dedupe")?.addEventListener("click", async () => {
   const strategy = $("dedupe-strategy")?.value || "oldest";
-  if (!window.confirm("Collapse ALL duplicate groups? Extra copies go to the recycle bin (undoable).")) return;
+  if (!window.confirm(t("collapseDupesConfirm"))) return;
   try {
     const n = await invoke("dedupe_library", { strategy, hash: null });
     log("deduped", n);
@@ -1867,7 +2273,7 @@ async function showPlaylists() {
 $("playlist-select")?.addEventListener("change", () => showPlaylists());
 
 $("btn-new-playlist")?.addEventListener("click", async () => {
-  const name = window.prompt("Playlist name:");
+  const name = window.prompt(t("playlistNamePrompt"));
   if (!name) return;
   try {
     await invoke("create_playlist", { name });
@@ -1880,12 +2286,12 @@ $("btn-new-playlist")?.addEventListener("click", async () => {
 $("pl-add-selected")?.addEventListener("click", async () => {
   const pid = $("playlist-select")?.value;
   if (!pid) {
-    window.alert("Select a playlist first.");
+    window.alert(t("selectPlaylistFirst"));
     return;
   }
   const ids = selectedIds();
   if (!ids.length) {
-    window.alert("Select assets in the All Sounds view first (Multi-select).");
+    window.alert(t("selectAssetsFirst"));
     return;
   }
   try {
@@ -1905,10 +2311,10 @@ function selectedIds() {
 $("btn-delete")?.addEventListener("click", async () => {
   const ids = selectedIds();
   if (!ids.length) {
-    window.alert("Select one or more assets first (use Multi-select).");
+    window.alert(t("selectOneOrMore"));
     return;
   }
-  if (!window.confirm(`Move ${ids.length} item(s) to the recycle bin?`)) return;
+  if (!window.confirm(t("moveItemsConfirm")(ids.length))) return;
   try {
     await invoke("soft_delete_assets", { assetIds: ids });
     state.selectedSet = new Set();
@@ -1947,7 +2353,7 @@ $("trash-restore")?.addEventListener("click", async () => {
 $("trash-purge")?.addEventListener("click", async () => {
   const ids = selectedIds();
   if (!ids.length) return;
-  if (!window.confirm(`Permanently delete ${ids.length} item(s)? This cannot be undone.`)) return;
+  if (!window.confirm(t("purgeItemsConfirm")(ids.length))) return;
   try {
     await invoke("purge_assets", { assetIds: ids });
     state.selectedSet = new Set();
@@ -1958,7 +2364,7 @@ $("trash-purge")?.addEventListener("click", async () => {
 });
 
 $("btn-empty-trash")?.addEventListener("click", async () => {
-  if (!window.confirm("Permanently delete ALL items in the recycle bin?")) return;
+  if (!window.confirm(t("emptyTrashConfirm"))) return;
   try {
     const n = await invoke("empty_trash");
     log("emptied trash", n);
@@ -1973,7 +2379,7 @@ async function refreshUndoButton() {
   if (!btn) return;
   try {
     const label = await invoke("undo_peek");
-    btn.title = label ? `Undo: ${label}` : "Nothing to undo";
+    btn.title = label ? t("undoLabel")(label) : t("nothingToUndo");
     btn.disabled = !label;
   } catch (_) {
     btn.disabled = false;
@@ -2015,20 +2421,20 @@ function renderTagManager() {
       const act = btn.dataset.act;
       try {
         if (act === "rename") {
-          const next = window.prompt(`Rename “${name}” to:`, name);
+          const next = window.prompt(t("renameTagPrompt")(name), name);
           if (!next || next === name) return;
           await invoke("rename_tag", { tagId: id, newName: next });
         } else if (act === "delete") {
-          if (!window.confirm(`Delete tag “${name}” from all assets? (undoable)`)) return;
+          if (!window.confirm(t("deleteTagConfirm")(name))) return;
           await invoke("delete_tag", { tagId: id });
         } else if (act === "merge") {
           const others = state.tags.filter((t) => t.id !== id);
           const list = others.map((t) => `${t.name}`).join(", ");
-          const into = window.prompt(`Merge “${name}” INTO which tag?\nAvailable: ${list}`);
+          const into = window.prompt(t("mergeTagPrompt")(name, list));
           if (!into) return;
           const target = others.find((t) => t.name === into);
           if (!target) {
-            window.alert("Target tag not found.");
+            window.alert(t("targetTagNotFound"));
             return;
           }
           await invoke("merge_tags", { fromId: id, toId: target.id });
@@ -2048,12 +2454,24 @@ function fillBatchCollections() {
   if (!sel) return;
   const cur = sel.value;
   sel.innerHTML =
-    '<option value="">Collection…</option>' +
+    `<option value="">${t("collectionPick")}</option>` +
     state.collections
       .filter((c) => c.collection_type !== "smart")
       .map((c) => `<option value="${escapeAttr(c.id)}">${escapeHtml(c.name)}</option>`)
       .join("");
   if (cur) sel.value = cur;
+}
+
+function renderSettings() {
+  const panel = $("settings-panel");
+  if (!panel) return;
+  panel.querySelectorAll(".lang-option").forEach((b) => {
+    b.classList.toggle("active", b.dataset.lang === lang);
+    if (!b.dataset.bound) {
+      b.dataset.bound = "1";
+      b.addEventListener("click", () => setLang(b.dataset.lang));
+    }
+  });
 }
 
 document.querySelectorAll(".nav-item").forEach((el) => {
@@ -2066,10 +2484,16 @@ document.querySelectorAll(".nav-item").forEach((el) => {
     state.filter.collectionId = null;
     if ($("search-input")) $("search-input").value = "";
     if (state.currentView === "map") {
+      $("settings-panel")?.classList.add("hidden");
       await showMap();
       bindMapClick();
+    } else if (state.currentView === "settings") {
+      $("map-panel")?.classList.add("hidden");
+      document.querySelector(".asset-table")?.classList.add("hidden");
+      await refresh();
     } else {
       $("map-panel")?.classList.add("hidden");
+      $("settings-panel")?.classList.add("hidden");
       document.querySelector(".asset-table")?.classList.remove("hidden");
       await refresh();
     }

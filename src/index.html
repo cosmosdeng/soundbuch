@@ -144,8 +144,8 @@
     <header class="topbar">
       <div class="brand">soundbuch</div>
       <div class="search-wrap">
-        <input id="search-input" type="search" placeholder="Search filename, tag, person, location…" />
-        <button id="btn-search" class="ghost">Search</button>
+        <input id="search-input" type="search" data-i18n-placeholder="searchPlaceholder" />
+        <button id="btn-search" class="ghost" data-i18n="search">Search</button>
       </div>
       <div class="library-label" id="library-label"></div>
     </header>
@@ -153,29 +153,30 @@
     <div class="layout">
       <aside class="sidebar">
         <nav>
-          <button class="nav-item active" data-view="all">All Sounds</button>
-          <button class="nav-item" data-view="recent">Recent</button>
-          <button class="nav-item" data-view="map">Map</button>
-          <button class="nav-item" data-view="trash">Recycle Bin</button>
-          <button class="nav-item" data-view="dupes">Duplicates</button>
-          <button class="nav-item" data-view="playlists">Playlists</button>
+          <button class="nav-item active" data-view="all" data-i18n="navAll">All Sounds</button>
+          <button class="nav-item" data-view="recent" data-i18n="navRecent">Recent</button>
+          <button class="nav-item" data-view="map" data-i18n="navMap">Map</button>
+          <button class="nav-item" data-view="trash" data-i18n="navTrash">Recycle Bin</button>
+          <button class="nav-item" data-view="dupes" data-i18n="navDupes">Duplicates</button>
+          <button class="nav-item" data-view="playlists" data-i18n="navPlaylists">Playlists</button>
+          <button class="nav-item" data-view="settings" data-i18n="navSettings">Settings</button>
         </nav>
         <div class="sidebar-section">
-          <div class="sidebar-title">Collections</div>
+          <div class="sidebar-title" data-i18n="collections">Collections</div>
           <div id="collection-list" class="chip-list"></div>
           <div class="import-actions">
-            <button id="btn-new-collection" class="ghost small">+ Collection</button>
-            <button id="btn-new-smart" class="ghost small">+ Smart</button>
+            <button id="btn-new-collection" class="ghost small" data-i18n="newCollection">+ Collection</button>
+            <button id="btn-new-smart" class="ghost small" data-i18n="newSmart">+ Smart</button>
           </div>
         </div>
         <div class="sidebar-section">
-          <div class="sidebar-title">Tags</div>
+          <div class="sidebar-title" data-i18n="tags">Tags</div>
           <div class="import-actions" style="margin-bottom:6px">
-            <select id="tag-match-mode" title="How multiple tags combine">
-              <option value="all">Tags: ALL</option>
-              <option value="any">Tags: ANY</option>
+            <select id="tag-match-mode" data-i18n-title="tagMatchTitle">
+              <option value="all" data-i18n="tagAll">Tags: ALL</option>
+              <option value="any" data-i18n="tagAny">Tags: ANY</option>
             </select>
-            <button id="btn-tag-manager" class="ghost small">Manage</button>
+            <button id="btn-tag-manager" class="ghost small" data-i18n="manage">Manage</button>
           </div>
           <div id="tag-list" class="chip-list"></div>
           <div id="tag-manager" class="hidden" style="margin-top:8px;font-size:12px"></div>
@@ -184,51 +185,51 @@
 
       <main class="content">
         <div class="toolbar">
-          <button id="btn-import" class="primary">Import</button>
-          <button id="btn-recovery" class="ghost hidden">Resume Incomplete</button>
-          <button id="btn-multi" class="ghost" title="Multi-select for batch edit">Multi-select</button>
-          <button id="btn-delete" class="ghost" title="Move selection to recycle bin">Delete</button>
-          <button id="btn-undo" class="ghost" title="Undo last action">↩ Undo</button>
-          <button id="btn-empty-trash" class="ghost hidden" title="Permanently delete all trashed items">Empty Bin</button>
+          <button id="btn-import" class="primary" data-i18n="import">Import</button>
+          <button id="btn-recovery" class="ghost hidden" data-i18n="resumeIncomplete">Resume Incomplete</button>
+          <button id="btn-multi" class="ghost" data-i18n-title="multiSelectTitle" data-i18n="multiSelect">Multi-select</button>
+          <button id="btn-delete" class="ghost" data-i18n-title="deleteTitle" data-i18n="delete">Delete</button>
+          <button id="btn-undo" class="ghost" data-i18n-title="undoTitle"><span data-i18n="undo">↩ Undo</span></button>
+          <button id="btn-empty-trash" class="ghost hidden" data-i18n-title="emptyBinTitle" data-i18n="emptyBin">Empty Bin</button>
           <span id="asset-count" class="muted"></span>
         </div>
 
         <div id="trash-bar" class="toolbar hidden">
-          <span class="muted">Recycle bin — restore or permanently delete</span>
-          <button id="trash-restore" class="ghost small">Restore selected</button>
-          <button id="trash-purge" class="ghost small">Delete forever</button>
+          <span class="muted" data-i18n="trashBar">Recycle bin — restore or permanently delete</span>
+          <button id="trash-restore" class="ghost small" data-i18n="restoreSelected">Restore selected</button>
+          <button id="trash-purge" class="ghost small" data-i18n="deleteForever">Delete forever</button>
         </div>
 
         <div id="dupes-bar" class="toolbar hidden">
-          <span class="muted">Content-identical copies (SHA-256)</span>
+          <span class="muted" data-i18n="dupesBar">Content-identical copies (SHA-256)</span>
           <select id="dedupe-strategy">
-            <option value="oldest">Keep oldest</option>
-            <option value="newest">Keep newest</option>
-            <option value="lowest-id">Keep lowest id</option>
+            <option value="oldest" data-i18n="keepOldest">Keep oldest</option>
+            <option value="newest" data-i18n="keepNewest">Keep newest</option>
+            <option value="lowest-id" data-i18n="keepLowestId">Keep lowest id</option>
           </select>
-          <button id="btn-dedupe" class="ghost small">Clean all groups</button>
+          <button id="btn-dedupe" class="ghost small" data-i18n="cleanAllGroups">Clean all groups</button>
         </div>
 
         <div id="playlist-bar" class="toolbar hidden">
           <select id="playlist-select"></select>
-          <button id="btn-new-playlist" class="ghost small">+ New</button>
-          <button id="pl-add-selected" class="ghost small">Add selected</button>
-          <input id="playlist-name" type="text" placeholder="Playlist name" class="hidden" />
+          <button id="btn-new-playlist" class="ghost small" data-i18n="newPlaylist">+ New</button>
+          <button id="pl-add-selected" class="ghost small" data-i18n="addSelected">Add selected</button>
+          <input id="playlist-name" type="text" data-i18n-placeholder="playlistName" class="hidden" />
         </div>
 
         <div id="batch-bar" class="toolbar hidden">
-          <span id="batch-count" class="muted">0 selected</span>
-          <input id="batch-tag" type="text" placeholder="Tag name" />
-          <button id="batch-add-tag" class="ghost small">+ Tag</button>
-          <button id="batch-remove-tag" class="ghost small">− Tag</button>
-          <input id="batch-person" type="text" placeholder="Person name" />
-          <button id="batch-add-person" class="ghost small">+ Person</button>
+          <span id="batch-count" class="muted"></span>
+          <input id="batch-tag" type="text" data-i18n-placeholder="tagName" />
+          <button id="batch-add-tag" class="ghost small" data-i18n="addTag">+ Tag</button>
+          <button id="batch-remove-tag" class="ghost small" data-i18n="removeTag">− Tag</button>
+          <input id="batch-person" type="text" data-i18n-placeholder="personName" />
+          <button id="batch-add-person" class="ghost small" data-i18n="addPerson">+ Person</button>
           <select id="batch-collection">
-            <option value="">Collection…</option>
+            <option value="" data-i18n="collectionPick">Collection…</option>
           </select>
-          <button id="batch-add-col" class="ghost small">+ Col</button>
-          <button id="batch-remove-col" class="ghost small">− Col</button>
-          <button id="batch-clear" class="ghost small">Clear</button>
+          <button id="batch-add-col" class="ghost small" data-i18n="addCol">+ Col</button>
+          <button id="batch-remove-col" class="ghost small" data-i18n="removeCol">− Col</button>
+          <button id="batch-clear" class="ghost small" data-i18n="clear">Clear</button>
         </div>
 
         <div class="browser-and-detail">
@@ -237,27 +238,42 @@
               <thead>
                 <tr>
                   <th class="col-check hidden">✓</th>
-                  <th>Filename</th>
-                  <th>Duration</th>
-                  <th>Format</th>
-                  <th>Recorded</th>
-                  <th>Size</th>
+                  <th data-i18n="colFilename">Filename</th>
+                  <th data-i18n="colDuration">Duration</th>
+                  <th data-i18n="colFormat">Format</th>
+                  <th data-i18n="colRecorded">Recorded</th>
+                  <th data-i18n="colSize">Size</th>
                 </tr>
               </thead>
               <tbody id="asset-rows"></tbody>
             </table>
-            <div id="empty-state" class="empty hidden">
-              No sounds yet. Click <strong>Import</strong> to add files.
+            <div id="empty-state" class="empty hidden" data-i18n="emptyState">
+              No sounds yet. Click Import to add files.
             </div>
             <div id="map-panel" class="hidden" style="padding:12px">
-              <div class="section-label">GPS assets — click a point to select</div>
+              <div class="section-label" data-i18n="gpsAssets">GPS assets — click a point to select</div>
               <canvas id="map-canvas" width="800" height="420" style="width:100%;background:#0b1220;border:1px solid #243044;border-radius:8px"></canvas>
               <div id="map-legend" class="muted" style="margin-top:8px"></div>
+            </div>
+            <div id="settings-panel" class="hidden" style="padding:16px;max-width:520px">
+              <div class="section-label" data-i18n="settings">Settings</div>
+              <div class="field-row" style="margin-top:12px">
+                <label data-i18n="interfaceLanguage">Interface language</label>
+                <div class="lang-switch" role="group" aria-label="Language">
+                  <button type="button" class="lang-btn lang-option active" data-lang="en">English</button>
+                  <button type="button" class="lang-btn lang-option" data-lang="zh">中文</button>
+                </div>
+                <p class="hint" data-i18n="languageHint">Choose the language for the interface.</p>
+              </div>
+              <div class="field-row" style="margin-top:20px">
+                <label data-i18n="about">About</label>
+                <p class="muted" data-i18n="aboutText">soundbuch — local sound asset manager. Originals are never modified.</p>
+              </div>
             </div>
           </section>
 
           <aside class="detail" id="detail-panel">
-            <div class="empty">Select a sound to see details.</div>
+            <div class="empty" data-i18n="selectSound">Select a sound to see details.</div>
           </aside>
         </div>
       </main>
@@ -266,28 +282,28 @@
     <!-- Import dialog -->
     <div id="import-modal" class="modal hidden">
       <div class="modal-card">
-        <h2>Import Audio</h2>
+        <h2 data-i18n="importAudio">Import Audio</h2>
         <div class="import-drop" id="import-drop">
-          <p>Drop files or folders here</p>
+          <p data-i18n="dropFiles">Drop files or folders here</p>
           <div class="import-actions">
-            <button id="btn-select-files">Select Files…</button>
-            <button id="btn-select-folder">Select Folder…</button>
+            <button id="btn-select-files" data-i18n="selectFiles">Select Files…</button>
+            <button id="btn-select-folder" data-i18n="selectFolder">Select Folder…</button>
           </div>
           <div class="add-row" style="margin-top:12px">
-            <input id="manual-path" type="text" placeholder="Or type a full file/folder path…" />
-            <button type="button" id="btn-add-path">Scan</button>
+            <input id="manual-path" type="text" data-i18n-placeholder="manualPathPlaceholder" />
+            <button type="button" id="btn-add-path" data-i18n="scan">Scan</button>
           </div>
         </div>
         <div id="scan-result" class="scan-result hidden"></div>
         <p id="import-status" class="status-msg"></p>
         <div class="modal-actions">
           <select id="duplicate-action">
-            <option value="skip">Duplicate: Skip (default)</option>
-            <option value="import_as_duplicate">Duplicate: Import as duplicate</option>
-            <option value="cancel">Duplicate: Cancel</option>
+            <option value="skip" data-i18n="dupSkip">Duplicate: Skip (default)</option>
+            <option value="import_as_duplicate" data-i18n="dupImport">Duplicate: Import as duplicate</option>
+            <option value="cancel" data-i18n="dupCancel">Duplicate: Cancel</option>
           </select>
-          <button id="btn-start-import" class="primary hidden">Import</button>
-          <button id="btn-close-import">Close</button>
+          <button id="btn-start-import" class="primary hidden" data-i18n="import">Import</button>
+          <button id="btn-close-import" data-i18n="close">Close</button>
         </div>
         <div id="import-progress" class="progress hidden"></div>
       </div>
@@ -296,10 +312,10 @@
     <!-- Recovery dialog -->
     <div id="recovery-modal" class="modal hidden">
       <div class="modal-card">
-        <h2>Unfinished Imports</h2>
+        <h2 data-i18n="unfinishedImports">Unfinished Imports</h2>
         <div id="recovery-list"></div>
         <div class="modal-actions">
-          <button id="btn-close-recovery">Close</button>
+          <button id="btn-close-recovery" data-i18n="close">Close</button>
         </div>
       </div>
     </div>
@@ -307,45 +323,45 @@
     <!-- Smart collection dialog -->
     <div id="smart-modal" class="modal hidden">
       <div class="modal-card">
-        <h2>New Smart Collection</h2>
+        <h2 data-i18n="newSmartCollection">New Smart Collection</h2>
         <div class="field-row">
-          <label>Name</label>
-          <input id="smart-name" type="text" placeholder="e.g. Field HD" />
+          <label data-i18n="name">Name</label>
+          <input id="smart-name" type="text" data-i18n-placeholder="namePlaceholder" />
         </div>
         <div class="field-row">
-          <label>Match</label>
+          <label data-i18n="match">Match</label>
           <select id="smart-match">
-            <option value="all">All conditions (AND)</option>
-            <option value="any">Any condition (OR)</option>
+            <option value="all" data-i18n="matchAll">All conditions (AND)</option>
+            <option value="any" data-i18n="matchAny">Any condition (OR)</option>
           </select>
         </div>
         <div class="field-row">
-          <label>Condition</label>
+          <label data-i18n="condition">Condition</label>
           <div class="path-row">
             <select id="smart-field">
-              <option value="tag">Tag</option>
-              <option value="person">Person</option>
-              <option value="filename">Filename contains</option>
-              <option value="text">Full-text</option>
-              <option value="sample_rate">Sample rate</option>
-              <option value="has_gps">Has GPS</option>
-              <option value="recorded_after">Recorded after</option>
+              <option value="tag" data-i18n="fieldTag">Tag</option>
+              <option value="person" data-i18n="fieldPerson">Person</option>
+              <option value="filename" data-i18n="fieldFilename">Filename contains</option>
+              <option value="text" data-i18n="fieldText">Full-text</option>
+              <option value="sample_rate" data-i18n="fieldSampleRate">Sample rate</option>
+              <option value="has_gps" data-i18n="fieldHasGps">Has GPS</option>
+              <option value="recorded_after" data-i18n="fieldRecordedAfter">Recorded after</option>
             </select>
             <select id="smart-op">
-              <option value="is">is</option>
-              <option value="is_not">is not</option>
-              <option value="contains">contains</option>
-              <option value="eq">=</option>
-              <option value="gte">≥</option>
-              <option value="lte">≤</option>
+              <option value="is" data-i18n="opIs">is</option>
+              <option value="is_not" data-i18n="opIsNot">is not</option>
+              <option value="contains" data-i18n="opContains">contains</option>
+              <option value="eq" data-i18n="opEq">=</option>
+              <option value="gte" data-i18n="opGte">≥</option>
+              <option value="lte" data-i18n="opLte">≤</option>
             </select>
-            <input id="smart-value" type="text" placeholder="value" />
+            <input id="smart-value" type="text" data-i18n-placeholder="valuePlaceholder" />
           </div>
         </div>
-        <p class="hint">One condition per collection for now. JSON rules can be extended later.</p>
+        <p class="hint" data-i18n="smartHint">One condition per collection for now. JSON rules can be extended later.</p>
         <div class="modal-actions">
-          <button id="btn-save-smart" class="primary">Create</button>
-          <button id="btn-close-smart">Cancel</button>
+          <button id="btn-save-smart" class="primary" data-i18n="create">Create</button>
+          <button id="btn-close-smart" data-i18n="cancel">Cancel</button>
         </div>
         <p id="smart-status" class="status-msg"></p>
       </div>
