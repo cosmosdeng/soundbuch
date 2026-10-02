@@ -949,17 +949,19 @@ pub fn parse_wma(path: &Path) -> Result<WmaParse> {
         ..Default::default()
     };
 
-    // Top-level Header Object: GUID(16) + size(8) + object_count(4) + reserved(2)
-    let mut hdr = [0u8; 24];
+    // Top-level Header Object:
+    // GUID(16) + size(8) + object_count(4) + reserved(2) = 30 bytes.
+    // Child objects begin at offset 30.
+    let mut hdr = [0u8; 30];
     r.read_exact(&mut hdr)?;
     if hdr[0..16] != ASF_HEADER {
         return Err(Error::other("not an ASF/WMA file"));
     }
     let header_size = u64::from_le_bytes(hdr[16..24].try_into().unwrap());
-    let body_end = header_size.max(24);
+    let body_end = header_size.max(30);
 
     // Walk child objects inside the header.
-    let mut pos = 24u64;
+    let mut pos = 30u64;
     while pos + 24 <= body_end {
         let mut obj_hdr = [0u8; 24];
         if r.read_exact(&mut obj_hdr).is_err() {
@@ -970,7 +972,7 @@ pub fn parse_wma(path: &Path) -> Result<WmaParse> {
         if obj_size < 24 {
             break;
         }
-        let data_len = (obj_size - 24).min(body_end - pos - 24) as usize;
+        let data_len = (obj_size - 24).min(body_end.saturating_sub(pos + 24)) as usize;
         let mut data = vec![0u8; data_len];
         if r.read_exact(&mut data).is_err() {
             break;
@@ -997,25 +999,26 @@ fn parse_asf_file_props(
     audio: &mut AudioMeta,
     raw: &mut BTreeMap<String, serde_json::Value>,
 ) {
-    // file_id(16) file_size(8) creation(8) packets(8) play_duration(8) send(8) preroll(8)
-    // flags(4) min_br(4) max_br(4) avg_br(4)
-    if data.len() < 68 {
+    // file_id(16) file_size(8) creation(8) packets(8) play_duration(8) send(8)
+    // preroll(8) flags(4) min_pkt(4) max_pkt(4) max_bitrate(4) = 80 bytes
+    if data.len() < 80 {
         return;
     }
     let play_duration = u64::from_le_bytes(data[40..48].try_into().unwrap());
-    let avg_bitrate = u32::from_le_bytes(data[64..68].try_into().unwrap());
+    // ASF File Properties has Maximum Bitrate (offset 76), not average.
+    let max_bitrate = u32::from_le_bytes(data[76..80].try_into().unwrap());
     // play_duration is in 100-nanosecond units.
     if play_duration > 0 {
         audio.duration_ms = Some(play_duration / 10_000);
     }
-    if avg_bitrate > 0 {
-        audio.bitrate = Some(avg_bitrate);
+    if max_bitrate > 0 {
+        audio.bitrate = Some(max_bitrate);
     }
     raw.insert(
         "asf_file_props".into(),
         serde_json::json!({
             "play_duration_100ns": play_duration,
-            "avg_bitrate_bps": avg_bitrate,
+            "max_bitrate_bps": max_bitrate,
         }),
     );
 }
@@ -1435,7 +1438,7 @@ mod tests {
         file_body.extend_from_slice(&0u32.to_le_bytes()); // flags
         file_body.extend_from_slice(&0u32.to_le_bytes()); // min
         file_body.extend_from_slice(&0u32.to_le_bytes()); // max
-        file_body.extend_from_slice(&64000u32.to_le_bytes()); // avg bps
+        file_body.extend_from_slice(&64000u32.to_le_bytes()); // max bitrate
 
         // Stream Properties body
         let mut stream_body = Vec::new();
