@@ -1346,7 +1346,7 @@ mod tests {
         cmt.extend_from_slice(&(vendor.len() as u32).to_le_bytes());
         cmt.extend_from_slice(vendor);
         cmt.extend_from_slice(&1u32.to_le_bytes());
-        let entry = b"TITLE=上海·雨夜";
+        let entry = "TITLE=上海·雨夜".as_bytes();
         cmt.extend_from_slice(&(entry.len() as u32).to_le_bytes());
         cmt.extend_from_slice(entry);
 
@@ -1388,7 +1388,7 @@ mod tests {
         tags.extend_from_slice(&(vendor.len() as u32).to_le_bytes());
         tags.extend_from_slice(vendor);
         tags.extend_from_slice(&1u32.to_le_bytes());
-        let entry = b"ARTIST=山田太郎";
+        let entry = "ARTIST=山田太郎".as_bytes();
         tags.extend_from_slice(&(entry.len() as u32).to_le_bytes());
         tags.extend_from_slice(entry);
 
